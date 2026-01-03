@@ -1,0 +1,73 @@
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 1rem;
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
+  font-size: 0.65rem;
+}
+
+.status-left,
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.status-label {
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.status-value {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.status-value.ok {
+  color: var(--positive);
+}
+
+.status-value.error {
+  color: var(--negative);
+}
+
+.active-asset {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255, 107, 0, 0.1);
+  border: 1px solid var(--text-primary);
+}
+
+.asset-type {
+  color: var(--text-muted);
+  font-size: 0.6rem;
+}
+
+.asset-ticker {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.powered-by {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
