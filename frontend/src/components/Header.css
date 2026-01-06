@@ -2,27 +2,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
-  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
   position: relative;
-}
-
-.header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--text-primary) 20%,
-    var(--text-primary) 80%,
-    transparent
-  );
-  opacity: 0.3;
+  z-index: 10;
 }
 
 .header-left, .header-right {
@@ -41,50 +25,56 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .logo-icon {
-  color: var(--text-primary);
-  font-size: 1.25rem;
-  animation: pulse 2s ease-in-out infinite;
+  color: var(--accent-primary);
+  font-size: 1rem;
 }
 
 .logo-text {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
+  font-family: var(--font-mono);
 }
 
 .logo-version {
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  padding: 0.15rem 0.4rem;
-  border: 1px solid var(--border-color);
-  margin-left: 0.5rem;
-  letter-spacing: 0.05em;
+  font-size: 0.55rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  margin-left: var(--space-sm);
+  letter-spacing: 0.03em;
 }
 
 /* Market Status */
 .market-status {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  background: rgba(0, 255, 136, 0.1);
-  border: 1px solid var(--positive);
-  font-size: 0.7rem;
+  gap: var(--space-sm);
+  padding: 0.25rem 0.6rem;
+  background: var(--positive-dim);
+  border: 1px solid rgba(0, 214, 127, 0.25);
+  border-radius: var(--radius-sm);
+  font-size: 0.6rem;
+  font-weight: 600;
   color: var(--positive);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .status-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--positive);
-  animation: pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--positive);
+  animation: pulse 2s ease-in-out infinite;
 }
 
 /* DateTime */
@@ -92,19 +82,25 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.1rem;
+  gap: 0;
 }
 
 .date {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
 }
 
 .time {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-accent);
+  color: var(--accent-secondary);
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

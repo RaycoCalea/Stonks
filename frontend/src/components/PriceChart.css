@@ -5,6 +5,10 @@
   flex-direction: column;
 }
 
+.chart-panel.full-width {
+  grid-column: 1 / -1;
+}
+
 .chart-panel.empty {
   display: flex;
   align-items: center;
@@ -57,8 +61,9 @@
 
 .chart-stats {
   display: flex;
-  gap: 1.5rem;
-  padding: 0.5rem 1rem;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border-color);
 }
 

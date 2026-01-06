@@ -1,0 +1,89 @@
+.tradingview-chart-panel {
+  background: #0a0f14;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.chart-header-tv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(180deg, #141b22 0%, #0a0f14 100%);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.chart-title-tv {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.chart-icon {
+  font-size: 1.1rem;
+}
+
+.symbol-badge {
+  background: rgba(255, 107, 0, 0.15);
+  color: #ff6b00;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  margin-left: 0.5rem;
+}
+
+.tv-link {
+  color: var(--text-accent);
+  text-decoration: none;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.tv-link:hover {
+  background: var(--text-accent);
+  color: #0a0f14;
+}
+
+.tradingview-container {
+  height: 500px;
+  width: 100%;
+}
+
+.tradingview-widget-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.tradingview-widget-container__widget {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* Override TradingView default styles for better integration */
+.tradingview-widget-container iframe {
+  border: none !important;
+}
+
+/* Loading state */
+.tradingview-container:empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0f14;
+}
+
+.tradingview-container:empty::after {
+  content: 'Loading TradingView...';
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+

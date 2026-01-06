@@ -1,27 +1,65 @@
+/* ============================================
+   STONKS TERMINAL - Professional Trading UI
+   Bloomberg-inspired financial terminal
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
 :root {
-  /* Terminal color scheme - inspired by classic Bloomberg terminal */
-  --bg-primary: #0a0e14;
-  --bg-secondary: #0d1117;
-  --bg-tertiary: #161b22;
-  --bg-panel: #0f1318;
+  /* Core palette - Dark professional */
+  --bg-primary: #0a0d10;
+  --bg-secondary: #0f1216;
+  --bg-tertiary: #141a20;
+  --bg-elevated: #1a2028;
+  --bg-hover: rgba(255, 255, 255, 0.03);
   
-  --text-primary: #ff6b00;
-  --text-secondary: #e0e0e0;
-  --text-muted: #6b7280;
-  --text-accent: #00ff88;
+  /* Text hierarchy */
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --text-muted: #5f6368;
+  --text-dim: #3c4043;
   
-  --border-color: #1e2530;
-  --border-highlight: #ff6b00;
+  /* Accent colors - Bloomberg-inspired */
+  --accent-primary: #ff7a00;
+  --accent-secondary: #00d67f;
+  --accent-blue: #0ea5e9;
+  --accent-purple: #8b5cf6;
   
-  --positive: #00ff88;
-  --negative: #ff4757;
-  --warning: #ffc107;
-  --info: #00a8ff;
+  /* Data colors */
+  --positive: #00d67f;
+  --positive-dim: rgba(0, 214, 127, 0.15);
+  --negative: #f43f5e;
+  --negative-dim: rgba(244, 63, 94, 0.15);
+  --neutral: #64748b;
   
-  --scanline-opacity: 0.03;
+  /* Border & dividers */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-highlight: rgba(255, 122, 0, 0.5);
+  
+  /* Effects */
+  --glow-primary: 0 0 20px rgba(255, 122, 0, 0.15);
+  --glow-positive: 0 0 20px rgba(0, 214, 127, 0.15);
+  --glow-negative: 0 0 20px rgba(244, 63, 94, 0.15);
+  
+  /* Typography */
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Spacing scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 }
 
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -33,62 +71,64 @@ html, body, #root {
 }
 
 body {
-  font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  font-family: var(--font-sans);
+  font-size: 14px;
   background: var(--bg-primary);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* Scanline effect overlay */
+/* Subtle grid background */
 body::before {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+  background-size: 50px 50px;
   pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, var(--scanline-opacity)),
-    rgba(0, 0, 0, var(--scanline-opacity)) 1px,
-    transparent 1px,
-    transparent 2px
-  );
-  z-index: 9999;
+  z-index: 0;
 }
 
-/* CRT glow effect */
+/* Ambient glow */
 body::after {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
   background: radial-gradient(
-    ellipse at center,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 100%
+    ellipse at 30% 20%,
+    rgba(255, 122, 0, 0.03) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    ellipse at 70% 80%,
+    rgba(0, 214, 127, 0.02) 0%,
+    transparent 50%
   );
-  z-index: 9998;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 4px;
+  background: var(--border-default);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -97,60 +137,120 @@ body::after {
 
 /* Selection */
 ::selection {
-  background: var(--text-primary);
+  background: var(--accent-primary);
   color: var(--bg-primary);
 }
 
-/* Input styles */
-input, select, button {
+/* Input base */
+input, select, button, textarea {
   font-family: inherit;
   font-size: inherit;
+  color: inherit;
 }
 
-input:focus, select:focus, button:focus {
+input:focus, select:focus, button:focus, textarea:focus {
   outline: none;
 }
 
+/* Links */
+a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+a:hover {
+  color: var(--text-primary);
+}
+
 /* Animations */
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.animate-slide-in {
-  animation: slideIn 0.3s ease-out;
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.4s ease-out;
 }
 
-/* Utility classes */
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Data display utilities */
+.mono {
+  font-family: var(--font-mono);
+}
+
 .text-positive { color: var(--positive); }
 .text-negative { color: var(--negative); }
-.text-warning { color: var(--warning); }
-.text-info { color: var(--info); }
-.text-primary { color: var(--text-primary); }
 .text-muted { color: var(--text-muted); }
+.text-accent { color: var(--accent-primary); }
 
+.positive { color: var(--positive); }
+.negative { color: var(--negative); }
+
+/* Number formatting */
+.number {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* Panel base styles */
+.panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-default);
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--bg-elevated) 50%,
+    var(--bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Focus ring */
+.focus-ring:focus {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+}
+
+/* Tooltip base */
+.tooltip {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}

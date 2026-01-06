@@ -116,8 +116,16 @@ function PriceChart({ data, assetType }) {
     )
   }
 
+  // Calculate additional stats
+  const volumes = chartData.map(d => d.volume).filter(v => v !== null && v !== undefined)
+  const avgVolume = volumes.length > 0 ? volumes.reduce((a, b) => a + b, 0) / volumes.length : 0
+  const startPrice = prices[0]
+  const endPrice = prices[prices.length - 1]
+  const startDate = chartData[0]?.date
+  const endDate = chartData[chartData.length - 1]?.date
+
   return (
-    <div className="chart-panel">
+    <div className="chart-panel full-width">
       <div className="chart-header">
         <div className="chart-title">
           <span className="chart-icon">📊</span>
@@ -130,8 +138,24 @@ function PriceChart({ data, assetType }) {
 
       <div className="chart-stats">
         <div className="stat">
-          <span className="stat-label">PERIOD</span>
-          <span className="stat-value">{chartData.length} pts</span>
+          <span className="stat-label">START</span>
+          <span className="stat-value">{formatDate(startDate)}</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">END</span>
+          <span className="stat-value">{formatDate(endDate)}</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">POINTS</span>
+          <span className="stat-value">{chartData.length}</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">START PRICE</span>
+          <span className="stat-value">{formatPrice(startPrice)}</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">END PRICE</span>
+          <span className="stat-value">{formatPrice(endPrice)}</span>
         </div>
         <div className="stat">
           <span className="stat-label">HIGH</span>
@@ -142,13 +166,13 @@ function PriceChart({ data, assetType }) {
           <span className="stat-value text-negative">{formatPrice(Math.min(...prices))}</span>
         </div>
         <div className="stat">
-          <span className="stat-label">LATEST</span>
-          <span className="stat-value">{formatPrice(prices[prices.length - 1])}</span>
+          <span className="stat-label">AVG VOLUME</span>
+          <span className="stat-value">{formatVolume(avgVolume)}</span>
         </div>
       </div>
 
       <div className="chart-container">
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={350}>
           <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
@@ -193,10 +217,21 @@ function PriceChart({ data, assetType }) {
 
       <div className="volume-container">
         <div className="volume-header">VOLUME</div>
-        <ResponsiveContainer width="100%" height={80}>
+        <ResponsiveContainer width="100%" height={100}>
           <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-            <XAxis dataKey="date" hide />
-            <YAxis hide />
+            <XAxis 
+              dataKey="date" 
+              tickFormatter={formatDate}
+              stroke="#6b7280"
+              tick={{ fill: '#6b7280', fontSize: 9 }}
+              interval="preserveStartEnd"
+            />
+            <YAxis 
+              tickFormatter={formatVolume}
+              stroke="#6b7280"
+              tick={{ fill: '#6b7280', fontSize: 9 }}
+              width={70}
+            />
             <Bar 
               dataKey="volume" 
               fill="#ff6b00" 

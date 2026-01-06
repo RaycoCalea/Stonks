@@ -90,6 +90,7 @@ function ControlPanel({
     { value: 'forex', label: 'FOREX', icon: '💱' },
     { value: 'index', label: 'INDICES', icon: '📊' },
     { value: 'treasury', label: 'TREASURY', icon: '🏛️' },
+    { value: 'macro', label: 'MACRO', icon: '🌍' },
   ]
 
   const periods = [

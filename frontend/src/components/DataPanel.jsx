@@ -38,6 +38,10 @@ function DataPanel({ data }) {
     return <CryptoDataPanel data={data} formatNumber={formatNumber} formatPercent={formatPercent} formatPrice={formatPrice} getChangeClass={getChangeClass} />
   }
   
+  if (type === 'macro') {
+    return <MacroDataPanel data={data} formatNumber={formatNumber} formatPercent={formatPercent} formatPrice={formatPrice} getChangeClass={getChangeClass} />
+  }
+  
   if (type === 'commodity' || type === 'forex' || type === 'index' || type === 'treasury') {
     return <GenericAssetPanel data={data} formatNumber={formatNumber} formatPercent={formatPercent} formatPrice={formatPrice} getChangeClass={getChangeClass} />
   }
@@ -158,6 +162,178 @@ function GenericAssetPanel({ data, formatNumber, formatPercent, formatPrice, get
           <p className="description-text">{data.name}</p>
         </div>
       )}
+    </div>
+  )
+}
+
+function MacroDataPanel({ data, formatNumber, formatPercent, formatPrice, getChangeClass }) {
+  // Determine the unit scale based on indicator type
+  // FRED reports different indicators in different units
+  const getUnitInfo = () => {
+    const symbol = (data.symbol || '').toUpperCase()
+    const name = (data.name || '').toLowerCase()
+    
+    // Money supply, debt, GDP - FRED reports in billions, so multiply by 1B
+    if (['WM1NS', 'WM2NS', 'GFDEBTN', 'GDP', 'GDPC1', 'WALCL', 'RRPONTSYD'].includes(symbol) ||
+        name.includes('money supply') || name.includes('debt') || name.includes('gdp') ||
+        name.includes('fed total assets') || name.includes('balance sheet')) {
+      return { multiplier: 1e9, suffix: '' } // Value is in billions
+    }
+    
+    // Rates, percentages - already in correct units
+    if (name.includes('rate') || name.includes('yield') || name.includes('unemployment') ||
+        name.includes('inflation') || name.includes('cpi') || name.includes('pmi') ||
+        symbol.includes('UNRATE') || symbol.includes('DFF') || symbol.includes('MORTGAGE')) {
+      return { multiplier: 1, suffix: '%', isPercent: true }
+    }
+    
+    // Employment numbers - in thousands
+    if (['PAYEMS', 'ICSA'].includes(symbol) || name.includes('payroll') || name.includes('claims')) {
+      return { multiplier: 1e3, suffix: '' } // Value is in thousands
+    }
+    
+    // Default - assume actual value
+    return { multiplier: 1, suffix: '' }
+  }
+  
+  const unitInfo = getUnitInfo()
+  
+  const formatValue = (val) => {
+    if (val === null || val === undefined) return '—'
+    if (typeof val !== 'number') return String(val)
+    
+    // If it's a percentage/rate, format as such
+    if (unitInfo.isPercent) {
+      return val.toFixed(2) + '%'
+    }
+    
+    // Apply multiplier to get actual value
+    const actualVal = val * unitInfo.multiplier
+    
+    // Format the actual value
+    if (Math.abs(actualVal) >= 1e15) return (actualVal / 1e15).toFixed(2) + 'Q' // Quadrillion
+    if (Math.abs(actualVal) >= 1e12) return (actualVal / 1e12).toFixed(2) + 'T' // Trillion
+    if (Math.abs(actualVal) >= 1e9) return (actualVal / 1e9).toFixed(2) + 'B' // Billion
+    if (Math.abs(actualVal) >= 1e6) return (actualVal / 1e6).toFixed(2) + 'M' // Million
+    if (Math.abs(actualVal) >= 1e3) return (actualVal / 1e3).toFixed(2) + 'K' // Thousand
+    if (Math.abs(actualVal) < 1 && Math.abs(actualVal) > 0) return actualVal.toFixed(4)
+    return actualVal.toFixed(2)
+  }
+
+  const regionIcons = {
+    'US': '🇺🇸',
+    'EU': '🇪🇺',
+    'UK': '🇬🇧',
+    'ASIA': '🌏',
+    'OCEANIA': '🌏',
+    'LATAM': '🌎',
+    'EMEA': '🌍',
+    'GLOBAL': '🌐',
+  }
+
+  return (
+    <div className="data-panel macro">
+      <div className="panel-header">
+        <span className="panel-icon">{regionIcons[data.region] || '🌍'}</span>
+        <span className="panel-ticker">{data.name || data.symbol}</span>
+        <span className="panel-type">MACRO</span>
+        {data.region && <span className="panel-region">{data.region}</span>}
+        {data.current_value !== undefined && (
+          <span className="panel-price">{formatValue(data.current_value)}</span>
+        )}
+        {data.change_pct !== undefined && (
+          <span className={`panel-change ${getChangeClass(data.change_pct)}`}>
+            {data.change_pct >= 0 ? '▲' : '▼'} {Math.abs(data.change_pct).toFixed(2)}%
+          </span>
+        )}
+      </div>
+
+      <div className="data-sections">
+        <div className="data-section">
+          <h3 className="section-title">CURRENT DATA</h3>
+          <div className="section-grid">
+            <div className="data-row">
+              <span className="data-label">Current Value</span>
+              <span className="data-value">{formatValue(data.current_value)}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">Previous</span>
+              <span className="data-value">{formatValue(data.previous_value)}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">Change</span>
+              <span className={`data-value ${getChangeClass(data.change)}`}>
+                {data.change >= 0 ? '+' : ''}{formatValue(data.change)}
+              </span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">Change %</span>
+              <span className={`data-value ${getChangeClass(data.change_pct)}`}>
+                {data.change_pct >= 0 ? '+' : ''}{data.change_pct?.toFixed(2)}%
+              </span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">YoY Change</span>
+              <span className={`data-value ${getChangeClass(data.yoy_change_pct)}`}>
+                {data.yoy_change_pct >= 0 ? '+' : ''}{data.yoy_change_pct?.toFixed(2)}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="data-section">
+          <h3 className="section-title">RANGE</h3>
+          <div className="section-grid">
+            <div className="data-row">
+              <span className="data-label">52W High</span>
+              <span className="data-value text-positive">{formatValue(data.high_52w)}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">52W Low</span>
+              <span className="data-value text-negative">{formatValue(data.low_52w)}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">All-Time High</span>
+              <span className="data-value text-positive">{formatValue(data.all_time_high)}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">All-Time Low</span>
+              <span className="data-value text-negative">{formatValue(data.all_time_low)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="data-section">
+          <h3 className="section-title">DATA INFO</h3>
+          <div className="section-grid">
+            <div className="data-row">
+              <span className="data-label">Symbol</span>
+              <span className="data-value">{data.symbol}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">Source</span>
+              <span className="data-value">{data.source}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">Data Points</span>
+              <span className="data-value">{data.data_points}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">Start Date</span>
+              <span className="data-value">{data.start_date}</span>
+            </div>
+            <div className="data-row">
+              <span className="data-label">End Date</span>
+              <span className="data-value">{data.end_date}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="description-section">
+        <h3 className="section-title">ABOUT</h3>
+        <p className="description-text">{data.name}</p>
+      </div>
     </div>
   )
 }

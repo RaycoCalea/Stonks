@@ -239,4 +239,196 @@ class StockFetcher:
         except Exception as e:
             print(f"[STOCK YF HIST] Error: {e}")
             return {}
+    
+    @staticmethod
+    def fetch_financials(ticker: str) -> Dict[str, Any]:
+        """Fetch full financial statements using yfinance"""
+        resolved = StockFetcher.resolve(ticker)
+        cache_key = f"stock_fin:{resolved}"
+        
+        cached = get_cache(cache_key)
+        if cached:
+            return cached
+        
+        try:
+            import yfinance as yf
+            print(f"[STOCK FIN] Fetching financials for {resolved}")
+            
+            stock = yf.Ticker(resolved)
+            
+            result = {
+                "ticker": resolved,
+                "asset_type": "stock",
+                "financials": {},
+            }
+            
+            # Income Statement (quarterly and annual)
+            try:
+                income_annual = stock.income_stmt
+                if income_annual is not None and not income_annual.empty:
+                    result["financials"]["income_statement_annual"] = {
+                        "periods": [str(c.date()) for c in income_annual.columns],
+                        "data": {}
+                    }
+                    for idx in income_annual.index:
+                        values = income_annual.loc[idx].tolist()
+                        result["financials"]["income_statement_annual"]["data"][str(idx)] = [
+                            float(v) if v is not None and str(v) != 'nan' else None for v in values
+                        ]
+                
+                income_quarterly = stock.quarterly_income_stmt
+                if income_quarterly is not None and not income_quarterly.empty:
+                    result["financials"]["income_statement_quarterly"] = {
+                        "periods": [str(c.date()) for c in income_quarterly.columns],
+                        "data": {}
+                    }
+                    for idx in income_quarterly.index:
+                        values = income_quarterly.loc[idx].tolist()
+                        result["financials"]["income_statement_quarterly"]["data"][str(idx)] = [
+                            float(v) if v is not None and str(v) != 'nan' else None for v in values
+                        ]
+            except Exception as e:
+                print(f"[STOCK FIN] Income statement error: {e}")
+            
+            # Balance Sheet
+            try:
+                balance_annual = stock.balance_sheet
+                if balance_annual is not None and not balance_annual.empty:
+                    result["financials"]["balance_sheet_annual"] = {
+                        "periods": [str(c.date()) for c in balance_annual.columns],
+                        "data": {}
+                    }
+                    for idx in balance_annual.index:
+                        values = balance_annual.loc[idx].tolist()
+                        result["financials"]["balance_sheet_annual"]["data"][str(idx)] = [
+                            float(v) if v is not None and str(v) != 'nan' else None for v in values
+                        ]
+                
+                balance_quarterly = stock.quarterly_balance_sheet
+                if balance_quarterly is not None and not balance_quarterly.empty:
+                    result["financials"]["balance_sheet_quarterly"] = {
+                        "periods": [str(c.date()) for c in balance_quarterly.columns],
+                        "data": {}
+                    }
+                    for idx in balance_quarterly.index:
+                        values = balance_quarterly.loc[idx].tolist()
+                        result["financials"]["balance_sheet_quarterly"]["data"][str(idx)] = [
+                            float(v) if v is not None and str(v) != 'nan' else None for v in values
+                        ]
+            except Exception as e:
+                print(f"[STOCK FIN] Balance sheet error: {e}")
+            
+            # Cash Flow Statement
+            try:
+                cf_annual = stock.cashflow
+                if cf_annual is not None and not cf_annual.empty:
+                    result["financials"]["cash_flow_annual"] = {
+                        "periods": [str(c.date()) for c in cf_annual.columns],
+                        "data": {}
+                    }
+                    for idx in cf_annual.index:
+                        values = cf_annual.loc[idx].tolist()
+                        result["financials"]["cash_flow_annual"]["data"][str(idx)] = [
+                            float(v) if v is not None and str(v) != 'nan' else None for v in values
+                        ]
+                
+                cf_quarterly = stock.quarterly_cashflow
+                if cf_quarterly is not None and not cf_quarterly.empty:
+                    result["financials"]["cash_flow_quarterly"] = {
+                        "periods": [str(c.date()) for c in cf_quarterly.columns],
+                        "data": {}
+                    }
+                    for idx in cf_quarterly.index:
+                        values = cf_quarterly.loc[idx].tolist()
+                        result["financials"]["cash_flow_quarterly"]["data"][str(idx)] = [
+                            float(v) if v is not None and str(v) != 'nan' else None for v in values
+                        ]
+            except Exception as e:
+                print(f"[STOCK FIN] Cash flow error: {e}")
+            
+            # Key statistics and ratios
+            try:
+                info = stock.info
+                result["key_stats"] = {
+                    "market_cap": info.get('marketCap'),
+                    "enterprise_value": info.get('enterpriseValue'),
+                    "pe_ratio": info.get('trailingPE'),
+                    "forward_pe": info.get('forwardPE'),
+                    "peg_ratio": info.get('pegRatio'),
+                    "price_to_book": info.get('priceToBook'),
+                    "price_to_sales": info.get('priceToSalesTrailing12Months'),
+                    "ev_to_revenue": info.get('enterpriseToRevenue'),
+                    "ev_to_ebitda": info.get('enterpriseToEbitda'),
+                    "profit_margin": info.get('profitMargins'),
+                    "operating_margin": info.get('operatingMargins'),
+                    "return_on_assets": info.get('returnOnAssets'),
+                    "return_on_equity": info.get('returnOnEquity'),
+                    "revenue": info.get('totalRevenue'),
+                    "revenue_per_share": info.get('revenuePerShare'),
+                    "quarterly_revenue_growth": info.get('revenueGrowth'),
+                    "gross_profit": info.get('grossProfits'),
+                    "ebitda": info.get('ebitda'),
+                    "net_income": info.get('netIncomeToCommon'),
+                    "eps": info.get('trailingEps'),
+                    "forward_eps": info.get('forwardEps'),
+                    "quarterly_earnings_growth": info.get('earningsGrowth'),
+                    "total_cash": info.get('totalCash'),
+                    "total_cash_per_share": info.get('totalCashPerShare'),
+                    "total_debt": info.get('totalDebt'),
+                    "debt_to_equity": info.get('debtToEquity'),
+                    "current_ratio": info.get('currentRatio'),
+                    "quick_ratio": info.get('quickRatio'),
+                    "book_value": info.get('bookValue'),
+                    "operating_cash_flow": info.get('operatingCashflow'),
+                    "free_cash_flow": info.get('freeCashflow'),
+                    "beta": info.get('beta'),
+                    "52_week_high": info.get('fiftyTwoWeekHigh'),
+                    "52_week_low": info.get('fiftyTwoWeekLow'),
+                    "50_day_ma": info.get('fiftyDayAverage'),
+                    "200_day_ma": info.get('twoHundredDayAverage'),
+                    "shares_outstanding": info.get('sharesOutstanding'),
+                    "float_shares": info.get('floatShares'),
+                    "shares_short": info.get('sharesShort'),
+                    "short_ratio": info.get('shortRatio'),
+                    "short_percent_of_float": info.get('shortPercentOfFloat'),
+                    "held_percent_insiders": info.get('heldPercentInsiders'),
+                    "held_percent_institutions": info.get('heldPercentInstitutions'),
+                    "dividend_rate": info.get('dividendRate'),
+                    "dividend_yield": info.get('dividendYield'),
+                    "payout_ratio": info.get('payoutRatio'),
+                    "ex_dividend_date": info.get('exDividendDate'),
+                }
+            except Exception as e:
+                print(f"[STOCK FIN] Key stats error: {e}")
+            
+            # Earnings history
+            try:
+                earnings = stock.earnings_history
+                if earnings is not None and not earnings.empty:
+                    result["earnings_history"] = earnings.to_dict('records')
+            except:
+                pass
+            
+            # Analyst recommendations
+            try:
+                recommendations = stock.recommendations
+                if recommendations is not None and not recommendations.empty:
+                    result["recommendations"] = recommendations.tail(10).to_dict('records')
+            except:
+                pass
+            
+            # Major holders
+            try:
+                holders = stock.institutional_holders
+                if holders is not None and not holders.empty:
+                    result["institutional_holders"] = holders.head(10).to_dict('records')
+            except:
+                pass
+            
+            set_cache(cache_key, result)
+            return result
+            
+        except Exception as e:
+            print(f"[STOCK FIN] Error: {e}")
+            return {"ticker": resolved, "error": str(e)}
 
