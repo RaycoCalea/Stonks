@@ -11,158 +11,172 @@ function TradingViewChart({ symbol, assetType, theme = 'dark' }) {
 
   // Convert our symbol format to TradingView format
   const getTradingViewSymbol = () => {
-    if (!symbol) return 'AAPL'
+    if (!symbol) return 'NASDAQ:AAPL'
     
-    const sym = symbol.toUpperCase()
+    const sym = symbol.toUpperCase().trim()
     
     switch (assetType) {
       case 'crypto':
-        // TradingView crypto format: BINANCE:BTCUSD or COINBASE:BTCUSD
+        // TradingView crypto format: BINANCE:BTCUSD
         const cryptoMap = {
-          'BITCOIN': 'BTCUSD',
-          'BTC': 'BTCUSD',
-          'ETHEREUM': 'ETHUSD',
-          'ETH': 'ETHUSD',
-          'SOLANA': 'SOLUSD',
-          'SOL': 'SOLUSD',
-          'CARDANO': 'ADAUSD',
-          'ADA': 'ADAUSD',
-          'DOGECOIN': 'DOGEUSD',
-          'DOGE': 'DOGEUSD',
-          'XRP': 'XRPUSD',
-          'RIPPLE': 'XRPUSD',
-          'POLKADOT': 'DOTUSD',
-          'DOT': 'DOTUSD',
-          'AVALANCHE': 'AVAXUSD',
-          'AVAX': 'AVAXUSD',
-          'CHAINLINK': 'LINKUSD',
-          'LINK': 'LINKUSD',
-          'MATIC': 'MATICUSD',
-          'POLYGON': 'MATICUSD',
+          'BITCOIN': 'BTCUSDT', 'BTC': 'BTCUSDT',
+          'ETHEREUM': 'ETHUSDT', 'ETH': 'ETHUSDT',
+          'SOLANA': 'SOLUSDT', 'SOL': 'SOLUSDT',
+          'CARDANO': 'ADAUSDT', 'ADA': 'ADAUSDT',
+          'DOGECOIN': 'DOGEUSDT', 'DOGE': 'DOGEUSDT',
+          'XRP': 'XRPUSDT', 'RIPPLE': 'XRPUSDT',
+          'POLKADOT': 'DOTUSDT', 'DOT': 'DOTUSDT',
+          'AVALANCHE': 'AVAXUSDT', 'AVAX': 'AVAXUSDT',
+          'CHAINLINK': 'LINKUSDT', 'LINK': 'LINKUSDT',
+          'MATIC': 'MATICUSDT', 'POLYGON': 'MATICUSDT',
+          'LITECOIN': 'LTCUSDT', 'LTC': 'LTCUSDT',
+          'UNISWAP': 'UNIUSDT', 'UNI': 'UNIUSDT',
+          'COSMOS': 'ATOMUSDT', 'ATOM': 'ATOMUSDT',
+          'NEAR': 'NEARUSDT', 'ARBITRUM': 'ARBUSDT', 'ARB': 'ARBUSDT',
+          'OPTIMISM': 'OPUSDT', 'OP': 'OPUSDT',
+          'APTOS': 'APTUSDT', 'APT': 'APTUSDT',
+          'SHIBA-INU': 'SHIBUSDT', 'SHIB': 'SHIBUSDT',
+          'PEPE': 'PEPEUSDT', 'BONK': 'BONKUSDT',
         }
-        return `BINANCE:${cryptoMap[sym] || sym + 'USD'}`
+        const cryptoSymbol = cryptoMap[sym] || (sym.endsWith('USDT') ? sym : sym + 'USDT')
+        return `BINANCE:${cryptoSymbol}`
       
       case 'forex':
         // TradingView forex format: FX:EURUSD
         const forexMap = {
-          'EUR': 'EURUSD',
-          'GBP': 'GBPUSD',
-          'JPY': 'USDJPY',
-          'CHF': 'USDCHF',
-          'AUD': 'AUDUSD',
-          'CAD': 'USDCAD',
-          'NZD': 'NZDUSD',
+          'EUR': 'EURUSD', 'EURUSD': 'EURUSD', 'EUR=X': 'EURUSD',
+          'GBP': 'GBPUSD', 'GBPUSD': 'GBPUSD', 'GBP=X': 'GBPUSD',
+          'JPY': 'USDJPY', 'USDJPY': 'USDJPY', 'JPY=X': 'USDJPY',
+          'CHF': 'USDCHF', 'USDCHF': 'USDCHF', 'CHF=X': 'USDCHF',
+          'AUD': 'AUDUSD', 'AUDUSD': 'AUDUSD', 'AUD=X': 'AUDUSD',
+          'CAD': 'USDCAD', 'USDCAD': 'USDCAD', 'CAD=X': 'USDCAD',
+          'NZD': 'NZDUSD', 'NZDUSD': 'NZDUSD', 'NZD=X': 'NZDUSD',
+          'CNY': 'USDCNY', 'USDCNY': 'USDCNY',
+          'INR': 'USDINR', 'USDINR': 'USDINR',
+          'BRL': 'USDBRL', 'USDBRL': 'USDBRL',
+          'MXN': 'USDMXN', 'USDMXN': 'USDMXN',
         }
         return `FX:${forexMap[sym] || sym}`
       
       case 'commodity':
-        // TradingView commodity format
+        // TradingView commodity format - handle Yahoo tickers (GC=F) and names
         const commodityMap = {
-          'GOLD': 'COMEX:GC1!',
-          'GC=F': 'COMEX:GC1!',
-          'SILVER': 'COMEX:SI1!',
-          'SI=F': 'COMEX:SI1!',
-          'OIL': 'NYMEX:CL1!',
-          'CRUDE': 'NYMEX:CL1!',
-          'CL=F': 'NYMEX:CL1!',
-          'PLATINUM': 'NYMEX:PL1!',
-          'PALLADIUM': 'NYMEX:PA1!',
-          'NATURAL GAS': 'NYMEX:NG1!',
-          'NG=F': 'NYMEX:NG1!',
-          'COPPER': 'COMEX:HG1!',
+          // Gold
+          'GOLD': 'COMEX:GC1!', 'GC=F': 'COMEX:GC1!', 'GC': 'COMEX:GC1!', 'XAUUSD': 'OANDA:XAUUSD',
+          // Silver
+          'SILVER': 'COMEX:SI1!', 'SI=F': 'COMEX:SI1!', 'SI': 'COMEX:SI1!', 'XAGUSD': 'OANDA:XAGUSD',
+          // Oil
+          'OIL': 'NYMEX:CL1!', 'CRUDE': 'NYMEX:CL1!', 'CL=F': 'NYMEX:CL1!', 'CL': 'NYMEX:CL1!',
+          'WTI': 'NYMEX:CL1!', 'BRENT': 'NYMEX:BB1!', 'BZ=F': 'NYMEX:BB1!',
+          // Platinum & Palladium
+          'PLATINUM': 'NYMEX:PL1!', 'PL=F': 'NYMEX:PL1!', 'PL': 'NYMEX:PL1!',
+          'PALLADIUM': 'NYMEX:PA1!', 'PA=F': 'NYMEX:PA1!', 'PA': 'NYMEX:PA1!',
+          // Natural Gas
+          'NATURAL GAS': 'NYMEX:NG1!', 'NATGAS': 'NYMEX:NG1!', 'GAS': 'NYMEX:NG1!',
+          'NG=F': 'NYMEX:NG1!', 'NG': 'NYMEX:NG1!',
+          // Base metals
+          'COPPER': 'COMEX:HG1!', 'HG=F': 'COMEX:HG1!', 'HG': 'COMEX:HG1!',
+          // Agricultural
+          'CORN': 'CBOT:ZC1!', 'ZC=F': 'CBOT:ZC1!',
+          'WHEAT': 'CBOT:ZW1!', 'ZW=F': 'CBOT:ZW1!',
+          'SOYBEANS': 'CBOT:ZS1!', 'ZS=F': 'CBOT:ZS1!', 'SOYBEAN': 'CBOT:ZS1!',
+          'COFFEE': 'NYMEX:KC1!', 'KC=F': 'NYMEX:KC1!',
+          'SUGAR': 'NYMEX:SB1!', 'SB=F': 'NYMEX:SB1!',
+          'COTTON': 'NYMEX:CT1!', 'CT=F': 'NYMEX:CT1!',
         }
-        return commodityMap[sym] || `COMEX:${sym}`
+        return commodityMap[sym] || 'COMEX:GC1!'
       
       case 'index':
-        // TradingView index format
+        // TradingView index format - handle ETFs and actual indices
         const indexMap = {
-          'SPY': 'AMEX:SPY',
-          'QQQ': 'NASDAQ:QQQ',
-          'DIA': 'AMEX:DIA',
-          'IWM': 'AMEX:IWM',
-          'VIX': 'TVC:VIX',
-          '^GSPC': 'SP:SPX',
-          '^DJI': 'DJ:DJI',
-          '^IXIC': 'NASDAQ:IXIC',
+          // Major ETFs
+          'SPY': 'AMEX:SPY', 'QQQ': 'NASDAQ:QQQ', 'DIA': 'AMEX:DIA',
+          'IWM': 'AMEX:IWM', 'VOO': 'AMEX:VOO', 'VTI': 'AMEX:VTI',
+          'IVV': 'AMEX:IVV', 'VXX': 'CBOE:VXX',
+          // Actual indices (Yahoo format with ^)
+          '^GSPC': 'SP:SPX', '^SPX': 'SP:SPX', 'SPX': 'SP:SPX',
+          '^DJI': 'DJ:DJI', 'DJI': 'DJ:DJI', 'DOW': 'DJ:DJI',
+          '^IXIC': 'NASDAQ:IXIC', 'IXIC': 'NASDAQ:IXIC', 'NASDAQ': 'NASDAQ:IXIC',
+          '^RUT': 'RUSSELL:RUT', 'RUT': 'RUSSELL:RUT', 'RUSSELL': 'RUSSELL:RUT',
+          // Volatility
+          'VIX': 'TVC:VIX', '^VIX': 'TVC:VIX',
+          // International
+          '^FTSE': 'TVC:UKX', 'FTSE': 'TVC:UKX',
+          '^N225': 'TVC:NI225', 'NIKKEI': 'TVC:NI225',
+          '^HSI': 'TVC:HSI', 'HANG SENG': 'TVC:HSI',
+          '^STOXX50E': 'TVC:SX5E', 'STOXX': 'TVC:SX5E',
+          '^DAX': 'XETR:DAX', 'DAX': 'XETR:DAX',
         }
         return indexMap[sym] || `AMEX:${sym}`
       
       case 'treasury':
         // TradingView treasury format
         const treasuryMap = {
-          '2Y': 'TVC:US02Y',
-          '5Y': 'TVC:US05Y',
-          '10Y': 'TVC:US10Y',
-          '30Y': 'TVC:US30Y',
-          '^TNX': 'TVC:US10Y',
-          '^TYX': 'TVC:US30Y',
+          '2Y': 'TVC:US02Y', 'US02Y': 'TVC:US02Y', '^IRX': 'TVC:US03M',
+          '3M': 'TVC:US03M', '6M': 'TVC:US06M',
+          '5Y': 'TVC:US05Y', 'US05Y': 'TVC:US05Y',
+          '10Y': 'TVC:US10Y', 'US10Y': 'TVC:US10Y', '^TNX': 'TVC:US10Y',
+          '20Y': 'TVC:US20Y', '30Y': 'TVC:US30Y', 'US30Y': 'TVC:US30Y', '^TYX': 'TVC:US30Y',
         }
-        return treasuryMap[sym] || `TVC:US10Y`
+        return treasuryMap[sym] || 'TVC:US10Y'
       
       case 'macro':
         // Macro economic indicators - map to TradingView FRED symbols
         const macroMap = {
           // Volatility
-          'VIX': 'TVC:VIX',
-          '^VIX': 'TVC:VIX',
-          'VVIX': 'TVC:VIX',
-          'SKEW': 'TVC:VIX',
-          // Dollar
-          'DXY': 'TVC:DXY',
-          'DX-Y.NYB': 'TVC:DXY',
-          'DOLLAR INDEX': 'TVC:DXY',
+          'VIX': 'TVC:VIX', '^VIX': 'TVC:VIX',
+          // Dollar Index
+          'DXY': 'TVC:DXY', 'DX-Y.NYB': 'TVC:DXY', 'DOLLAR': 'TVC:DXY', 'DOLLAR INDEX': 'TVC:DXY',
           // Treasuries
-          'US10Y': 'TVC:US10Y',
-          'US02Y': 'TVC:US02Y',
-          'US30Y': 'TVC:US30Y',
-          '10Y': 'TVC:US10Y',
-          '2Y': 'TVC:US02Y',
-          '30Y': 'TVC:US30Y',
+          'US10Y': 'TVC:US10Y', 'US02Y': 'TVC:US02Y', 'US30Y': 'TVC:US30Y',
+          '10Y': 'TVC:US10Y', '2Y': 'TVC:US02Y', '30Y': 'TVC:US30Y',
           // Money Supply (FRED)
-          'M1': 'FRED:M1SL',
-          'M2': 'FRED:M2SL',
-          'WM1NS': 'FRED:M1SL',
-          'WM2NS': 'FRED:M2SL',
-          'MONEY SUPPLY': 'FRED:M2SL',
+          'M1': 'FRED:M1SL', 'M2': 'FRED:M2SL', 'WM1NS': 'FRED:M1SL', 'WM2NS': 'FRED:M2SL',
+          'MONEY SUPPLY': 'FRED:M2SL', 'MONEY': 'FRED:M2SL',
           // Fed
-          'FED FUNDS': 'FRED:FEDFUNDS',
-          'DFF': 'FRED:FEDFUNDS',
-          'FED RATE': 'FRED:FEDFUNDS',
-          'FED BALANCE SHEET': 'FRED:WALCL',
-          'WALCL': 'FRED:WALCL',
-          'FED ASSETS': 'FRED:WALCL',
+          'DFF': 'FRED:FEDFUNDS', 'FED FUNDS': 'FRED:FEDFUNDS', 'FED RATE': 'FRED:FEDFUNDS',
+          'WALCL': 'FRED:WALCL', 'FED BALANCE SHEET': 'FRED:WALCL', 'FED ASSETS': 'FRED:WALCL',
           // Inflation
-          'CPI': 'FRED:CPIAUCSL',
-          'CPIAUCSL': 'FRED:CPIAUCSL',
-          'INFLATION': 'TVC:US10Y-TVC:US10', // Use 10Y as proxy
-          'PCE': 'FRED:PCEPI',
+          'CPI': 'FRED:CPIAUCSL', 'CPIAUCSL': 'FRED:CPIAUCSL', 'INFLATION': 'FRED:CPIAUCSL',
+          'PCE': 'FRED:PCEPI', 'PCEPI': 'FRED:PCEPI',
           // Employment
-          'UNEMPLOYMENT': 'FRED:UNRATE',
-          'UNRATE': 'FRED:UNRATE',
-          'JOBS': 'FRED:PAYEMS',
-          'PAYEMS': 'FRED:PAYEMS',
-          'NONFARM PAYROLLS': 'FRED:PAYEMS',
+          'UNRATE': 'FRED:UNRATE', 'UNEMPLOYMENT': 'FRED:UNRATE',
+          'PAYEMS': 'FRED:PAYEMS', 'JOBS': 'FRED:PAYEMS', 'NONFARM': 'FRED:PAYEMS',
+          'ICSA': 'FRED:ICSA', 'CLAIMS': 'FRED:ICSA',
           // GDP
-          'GDP': 'FRED:GDP',
-          'REAL GDP': 'FRED:GDPC1',
-          'GDPC1': 'FRED:GDPC1',
+          'GDP': 'FRED:GDP', 'GDPC1': 'FRED:GDPC1', 'REAL GDP': 'FRED:GDPC1',
           // Debt
-          'US DEBT': 'FRED:GFDEBTN',
-          'DEBT': 'FRED:GFDEBTN',
-          'GFDEBTN': 'FRED:GFDEBTN',
+          'GFDEBTN': 'FRED:GFDEBTN', 'US DEBT': 'FRED:GFDEBTN', 'DEBT': 'FRED:GFDEBTN',
           // Yield curve
-          'YIELD CURVE': 'TVC:US10Y-TVC:US02Y',
-          'T10Y2Y': 'FRED:T10Y2Y',
+          'T10Y2Y': 'FRED:T10Y2Y', 'YIELD CURVE': 'FRED:T10Y2Y',
           // Housing
-          'MORTGAGE RATE': 'FRED:MORTGAGE30US',
-          'MORTGAGE30US': 'FRED:MORTGAGE30US',
+          'MORTGAGE30US': 'FRED:MORTGAGE30US', 'MORTGAGE': 'FRED:MORTGAGE30US',
+          'CSUSHPINSA': 'FRED:CSUSHPINSA', 'HOME PRICES': 'FRED:CSUSHPINSA',
+          // Population
+          'POPTHM': 'FRED:POPTHM', 'POPULATION': 'FRED:POPTHM',
         }
-        const upperSym = sym.toUpperCase()
-        return macroMap[upperSym] || `FRED:${sym}`
+        return macroMap[sym] || `FRED:${sym}`
       
+      case 'stock':
       default:
-        // Stocks - try common exchanges
-        return `NASDAQ:${sym}`
+        // Stocks - determine exchange based on common patterns
+        const stockExchangeMap = {
+          'AAPL': 'NASDAQ', 'MSFT': 'NASDAQ', 'GOOGL': 'NASDAQ', 'AMZN': 'NASDAQ',
+          'META': 'NASDAQ', 'NVDA': 'NASDAQ', 'TSLA': 'NASDAQ', 'NFLX': 'NASDAQ',
+          'AMD': 'NASDAQ', 'INTC': 'NASDAQ', 'CSCO': 'NASDAQ', 'ADBE': 'NASDAQ',
+          'CRM': 'NYSE', 'PYPL': 'NASDAQ', 'UBER': 'NYSE', 'ABNB': 'NASDAQ',
+          'JPM': 'NYSE', 'V': 'NYSE', 'MA': 'NYSE', 'BAC': 'NYSE',
+          'WMT': 'NYSE', 'DIS': 'NYSE', 'NKE': 'NYSE', 'KO': 'NYSE',
+          'PEP': 'NASDAQ', 'MCD': 'NYSE', 'SBUX': 'NASDAQ', 'COST': 'NASDAQ',
+          'HD': 'NYSE', 'LOW': 'NYSE', 'TGT': 'NYSE',
+          'XOM': 'NYSE', 'CVX': 'NYSE', 'COP': 'NYSE',
+          'BA': 'NYSE', 'CAT': 'NYSE', 'GE': 'NYSE', 'MMM': 'NYSE',
+          'JNJ': 'NYSE', 'PFE': 'NYSE', 'UNH': 'NYSE', 'MRK': 'NYSE',
+          'GS': 'NYSE', 'MS': 'NYSE', 'C': 'NYSE', 'WFC': 'NYSE',
+          'IBM': 'NYSE', 'ORCL': 'NYSE', 'SAP': 'NYSE',
+        }
+        const exchange = stockExchangeMap[sym] || 'NASDAQ'
+        return `${exchange}:${sym}`
     }
   }
 
@@ -231,17 +245,17 @@ function TradingViewChart({ symbol, assetType, theme = 'dark' }) {
     <div className="tradingview-chart-panel">
       <div className="chart-header-tv">
         <div className="chart-title-tv">
-          <span className="chart-icon">📈</span>
-          <span>TRADINGVIEW CHART</span>
+          <span className="chart-icon">◆</span>
+          <span>PRICE CHART</span>
           <span className="symbol-badge">{getTradingViewSymbol()}</span>
         </div>
         <a 
-          href={`https://www.tradingview.com/chart/?symbol=${getTradingViewSymbol()}`}
+          href={`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(getTradingViewSymbol())}`}
           target="_blank"
           rel="noopener noreferrer"
           className="tv-link"
         >
-          Open in TradingView ↗
+          Open Full Chart →
         </a>
       </div>
       <div className="tradingview-container" ref={containerRef} />

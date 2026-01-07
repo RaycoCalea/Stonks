@@ -84,13 +84,13 @@ function ControlPanel({
   }, [])
 
   const assetTypes = [
-    { value: 'stock', label: 'STOCKS', icon: '📈' },
+    { value: 'stock', label: 'STOCKS', icon: 'S' },
     { value: 'crypto', label: 'CRYPTO', icon: '₿' },
-    { value: 'commodity', label: 'COMMODITIES', icon: '🛢️' },
-    { value: 'forex', label: 'FOREX', icon: '💱' },
-    { value: 'index', label: 'INDICES', icon: '📊' },
-    { value: 'treasury', label: 'TREASURY', icon: '🏛️' },
-    { value: 'macro', label: 'MACRO', icon: '🌍' },
+    { value: 'commodity', label: 'COMMODITIES', icon: 'C' },
+    { value: 'forex', label: 'FOREX', icon: 'F' },
+    { value: 'index', label: 'INDICES', icon: 'I' },
+    { value: 'treasury', label: 'TREASURY', icon: 'T' },
+    { value: 'macro', label: 'MACRO', icon: 'M' },
   ]
 
   const periods = [

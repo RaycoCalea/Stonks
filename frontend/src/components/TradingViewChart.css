@@ -1,7 +1,11 @@
+/* ============================================
+   TRADINGVIEW CHART - Professional Integration
+   ============================================ */
+
 .tradingview-chart-panel {
-  background: #0a0f14;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   width: 100%;
 }
@@ -10,52 +14,63 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: linear-gradient(180deg, #141b22 0%, #0a0f14 100%);
-  border-bottom: 1px solid var(--border-color);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-tertiary);
+  border-bottom: 2px solid var(--border-subtle);
 }
 
 .chart-title-tv {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: bold;
-  color: var(--text-primary);
-  font-size: 0.85rem;
+  gap: var(--space-sm);
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .chart-icon {
-  font-size: 1.1rem;
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  opacity: 0.9;
 }
 
 .symbol-badge {
-  background: rgba(255, 107, 0, 0.15);
-  color: #ff6b00;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  margin-left: 0.5rem;
+  background: rgba(255, 122, 0, 0.12);
+  border: 1px solid rgba(255, 122, 0, 0.3);
+  color: var(--accent-primary);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-left: var(--space-sm);
 }
 
 .tv-link {
-  color: var(--text-accent);
+  color: var(--accent-blue);
   text-decoration: none;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
   padding: 0.35rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  transition: all 0.2s;
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  border-radius: var(--radius-sm);
+  background: rgba(14, 165, 233, 0.08);
+  transition: all 0.15s;
 }
 
 .tv-link:hover {
-  background: var(--text-accent);
-  color: #0a0f14;
+  background: rgba(14, 165, 233, 0.2);
+  border-color: rgba(14, 165, 233, 0.5);
+  color: var(--text-primary);
 }
 
 .tradingview-container {
-  height: 500px;
+  height: 520px;
   width: 100%;
+  background: var(--bg-primary);
 }
 
 .tradingview-widget-container {
@@ -68,7 +83,7 @@
   width: 100% !important;
 }
 
-/* Override TradingView default styles for better integration */
+/* Override TradingView default styles */
 .tradingview-widget-container iframe {
   border: none !important;
 }
@@ -78,12 +93,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0a0f14;
+  background: var(--bg-primary);
 }
 
 .tradingview-container:empty::after {
-  content: 'Loading TradingView...';
+  content: 'Loading Chart...';
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
 }
 
+/* Responsive */
+@media (max-width: 768px) {
+  .tradingview-container {
+    height: 400px;
+  }
+  
+  .chart-header-tv {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+  
+  .symbol-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.4rem;
+  }
+}

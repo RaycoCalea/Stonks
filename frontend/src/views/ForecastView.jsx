@@ -141,7 +141,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
       {/* Controls */}
       <div className="forecast-controls">
         <div className="forecast-header">
-          <h3 className="section-title">🎯 MONTE CARLO PRICE FORECAST (GBM)</h3>
+          <h3 className="section-title">MONTE CARLO PRICE FORECAST (GBM)</h3>
           <span className="sim-count">10,000 simulations</span>
         </div>
 
@@ -193,7 +193,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
 
       {error && (
         <div className="error-banner">
-          <span className="error-icon">⚠</span>
+          <span className="error-icon">!</span>
           <span>{error}</span>
         </div>
       )}
@@ -207,7 +207,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
 
       {selectedAssets.length === 0 && !loading && (
         <div className="forecast-prompt">
-          <div className="prompt-icon">🎯</div>
+          <div className="prompt-icon">%</div>
           <h3>Select an asset above</h3>
           <p>Use the search bar to select an asset for price forecasting</p>
           <div className="prompt-info">
@@ -220,7 +220,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
         <div className="forecast-results">
           {/* Historical Parameters */}
           <div className="params-panel">
-            <h4 className="panel-title">📊 HISTORICAL PARAMETERS</h4>
+            <h4 className="panel-title">HISTORICAL PARAMETERS</h4>
             <div className="params-grid">
               <div className="param-card">
                 <span className="param-label">Current Price</span>
@@ -253,7 +253,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
 
           {/* Risk Metrics */}
           <div className="risk-panel">
-            <h4 className="panel-title">⚠️ RISK METRICS</h4>
+            <h4 className="panel-title">RISK METRICS</h4>
             <div className="risk-grid">
               <div className="risk-card danger">
                 <span className="risk-label">VaR (95%)</span>
@@ -289,34 +289,34 @@ function ForecastView({ selectedAssets, onUpdate }) {
           {/* Scenario Analysis */}
           {forecastData.scenarios && (
             <div className="scenarios-panel">
-              <h4 className="panel-title">🎭 SCENARIO ANALYSIS</h4>
+              <h4 className="panel-title">SCENARIO ANALYSIS</h4>
               <div className="scenarios-grid">
                 <div className="scenario-card extreme-bull">
-                  <span className="scenario-name">🚀 Extreme Bull</span>
+                  <span className="scenario-name">Extreme Bull (99th)</span>
                   <span className="scenario-price">{formatPrice(forecastData.scenarios.extreme_bull?.final_price)}</span>
                   <span className="scenario-return">{formatPct(forecastData.scenarios.extreme_bull?.return_pct)}</span>
                   <span className="scenario-desc">99th Percentile</span>
                 </div>
                 <div className="scenario-card bull">
-                  <span className="scenario-name">🐂 Bull Case</span>
+                  <span className="scenario-name">Bull Case (90th)</span>
                   <span className="scenario-price">{formatPrice(forecastData.scenarios.bull_case?.final_price)}</span>
                   <span className="scenario-return">{formatPct(forecastData.scenarios.bull_case?.return_pct)}</span>
                   <span className="scenario-desc">90th Percentile</span>
                 </div>
                 <div className="scenario-card base">
-                  <span className="scenario-name">📊 Base Case</span>
+                  <span className="scenario-name">Base Case (50th)</span>
                   <span className="scenario-price">{formatPrice(forecastData.scenarios.base_case?.final_price)}</span>
                   <span className="scenario-return">{formatPct(forecastData.scenarios.base_case?.return_pct)}</span>
                   <span className="scenario-desc">Median (50th)</span>
                 </div>
                 <div className="scenario-card bear">
-                  <span className="scenario-name">🐻 Bear Case</span>
+                  <span className="scenario-name">Bear Case (10th)</span>
                   <span className="scenario-price">{formatPrice(forecastData.scenarios.bear_case?.final_price)}</span>
                   <span className="scenario-return">{formatPct(forecastData.scenarios.bear_case?.return_pct)}</span>
                   <span className="scenario-desc">10th Percentile</span>
                 </div>
                 <div className="scenario-card extreme-bear">
-                  <span className="scenario-name">💀 Extreme Bear</span>
+                  <span className="scenario-name">Extreme Bear (1st)</span>
                   <span className="scenario-price">{formatPrice(forecastData.scenarios.extreme_bear?.final_price)}</span>
                   <span className="scenario-return">{formatPct(forecastData.scenarios.extreme_bear?.return_pct)}</span>
                   <span className="scenario-desc">1st Percentile</span>
@@ -328,7 +328,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
           {/* Probability Analysis */}
           {forecastData.probability_analysis && (
             <div className="probability-panel">
-              <h4 className="panel-title">📈 PROBABILITY ANALYSIS</h4>
+              <h4 className="panel-title">PROBABILITY ANALYSIS</h4>
               <div className="probability-grid">
                 <div className="prob-item positive">
                   <span className="prob-label">Positive Return</span>
@@ -368,7 +368,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
 
           {/* Cone Chart */}
           <div className="chart-panel">
-            <h4 className="panel-title">📈 FORECAST CONE (Percentiles)</h4>
+            <h4 className="panel-title">FORECAST CONE (Percentiles)</h4>
             <ResponsiveContainer width="100%" height={400}>
               <ComposedChart data={getChartData()}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
@@ -403,7 +403,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
           {/* Return Distribution Histogram */}
           {getReturnBuckets().length > 0 && (
             <div className="chart-panel">
-              <h4 className="panel-title">📊 RETURN DISTRIBUTION</h4>
+              <h4 className="panel-title">RETURN DISTRIBUTION</h4>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={getReturnBuckets()} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
@@ -426,7 +426,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
 
           {/* Sample Paths */}
           <div className="chart-panel">
-            <h4 className="panel-title">🍝 SAMPLE PRICE PATHS (50 of 10,000)</h4>
+            <h4 className="panel-title">SAMPLE PRICE PATHS (50 of 10,000)</h4>
             <ResponsiveContainer width="100%" height={350}>
               <LineChart data={getSamplePaths()}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
@@ -441,7 +441,7 @@ function ForecastView({ selectedAssets, onUpdate }) {
 
           {/* Final Distribution Stats */}
           <div className="stats-panel">
-            <h4 className="panel-title">📊 FINAL PRICE DISTRIBUTION</h4>
+            <h4 className="panel-title">FINAL PRICE DISTRIBUTION</h4>
             <div className="stats-grid">
               <div className="stat-card">
                 <span className="stat-label">Median Final Price</span>

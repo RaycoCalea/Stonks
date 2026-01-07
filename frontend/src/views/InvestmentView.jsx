@@ -110,7 +110,7 @@ function InvestmentView({ selectedAssets, onUpdate }) {
       {/* Controls */}
       <div className="investment-controls">
         <div className="investment-header">
-          <h3 className="section-title">💰 INVESTMENT CALCULATOR</h3>
+          <h3 className="section-title">INVESTMENT CALCULATOR</h3>
         </div>
 
         {/* Asset Navigation */}
@@ -183,14 +183,14 @@ function InvestmentView({ selectedAssets, onUpdate }) {
         </div>
 
         <div className="frequency-info">
-          {frequency === 'none' && <p>💡 One-time investment: Invest ${initialAmount.toLocaleString()} at the start.</p>}
-          {frequency !== 'none' && <p>💡 Initial ${initialAmount.toLocaleString()} + ${recurringAmount.toLocaleString()} {frequency} = DCA strategy</p>}
+          {frequency === 'none' && <p>One-time investment: Invest ${initialAmount.toLocaleString()} at the start.</p>}
+          {frequency !== 'none' && <p>Initial ${initialAmount.toLocaleString()} + ${recurringAmount.toLocaleString()} {frequency} = DCA strategy</p>}
         </div>
       </div>
 
       {error && (
         <div className="error-banner">
-          <span className="error-icon">⚠</span>
+          <span className="error-icon">!</span>
           <span>{error}</span>
         </div>
       )}
@@ -204,7 +204,7 @@ function InvestmentView({ selectedAssets, onUpdate }) {
 
       {selectedAssets.length === 0 && !loading && (
         <div className="investment-prompt">
-          <div className="prompt-icon">💰</div>
+          <div className="prompt-icon">$</div>
           <h3>Select an asset above</h3>
           <p>Use the search bar to select an asset for investment analysis</p>
           <div className="prompt-info">
@@ -260,7 +260,7 @@ function InvestmentView({ selectedAssets, onUpdate }) {
           {/* Risk Metrics */}
           {investmentData.risk_metrics && (
             <div className="risk-metrics-panel">
-              <h4 className="panel-title">⚠️ RISK METRICS</h4>
+              <h4 className="panel-title">RISK METRICS</h4>
               <div className="risk-metrics-grid">
                 <div className="risk-metric">
                   <span className="metric-label">Volatility (Ann.)</span>
@@ -282,7 +282,7 @@ function InvestmentView({ selectedAssets, onUpdate }) {
 
           {/* Comparison Panel */}
           <div className="comparison-panel">
-            <h4 className="panel-title">📊 STRATEGY COMPARISON</h4>
+            <h4 className="panel-title">STRATEGY COMPARISON</h4>
             <div className="comparison-grid">
               <div className="comparison-card your-strategy">
                 <span className="comparison-title">Your Strategy</span>
@@ -298,7 +298,7 @@ function InvestmentView({ selectedAssets, onUpdate }) {
                 <span className="comparison-title">DCA Advantage</span>
                 <span className="comparison-return">{formatPct(investmentData.comparison.dca_advantage)}</span>
                 <span className="comparison-desc">
-                  {investmentData.comparison.dca_advantage >= 0 ? '✓ DCA Outperformed' : '✗ Buy & Hold Was Better'}
+                  {investmentData.comparison.dca_advantage >= 0 ? 'DCA Outperformed' : 'Buy & Hold Was Better'}
                 </span>
               </div>
             </div>
@@ -307,7 +307,7 @@ function InvestmentView({ selectedAssets, onUpdate }) {
           {/* Benchmark Comparison */}
           {investmentData.benchmark_comparison && (
             <div className="benchmark-panel">
-              <h4 className="panel-title">📈 BENCHMARK (vs S&P 500)</h4>
+              <h4 className="panel-title">BENCHMARK (vs S&P 500)</h4>
               <div className="benchmark-grid">
                 <div className="benchmark-card">
                   <span className="benchmark-label">Your Return</span>
@@ -325,7 +325,7 @@ function InvestmentView({ selectedAssets, onUpdate }) {
                   <span className="benchmark-label">Alpha</span>
                   <span className="benchmark-value">{formatPct(investmentData.benchmark_comparison.alpha)}</span>
                   <span className="benchmark-desc">
-                    {investmentData.benchmark_comparison.outperformed ? '🏆 Beat Market!' : '📉 Underperformed'}
+                    {investmentData.benchmark_comparison.outperformed ? 'Beat Market' : 'Underperformed'}
                   </span>
                 </div>
               </div>
@@ -334,12 +334,12 @@ function InvestmentView({ selectedAssets, onUpdate }) {
 
           {/* Portfolio Value Chart */}
           <div className="chart-panel">
-            <h4 className="panel-title">📈 PORTFOLIO VALUE OVER TIME</h4>
+            <h4 className="panel-title">PORTFOLIO VALUE OVER TIME</h4>
             <ResponsiveContainer width="100%" height={400}>
-              <ComposedChart data={investmentData.timeline}>
+              <ComposedChart data={investmentData.timeline} margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
                 <XAxis dataKey="date" tickFormatter={formatDate} stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 10 }} interval="preserveStartEnd" />
-                <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={formatPrice} width={80} />
+                <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={formatPrice} width={70} />
                 <Tooltip formatter={(v, name) => [formatPrice(v), name]} labelFormatter={formatDate} contentStyle={{ background: '#0d1117', border: '1px solid #30363d' }} />
                 <Legend />
                 <Area type="monotone" dataKey="invested" stroke="#6b7280" fill="#6b7280" fillOpacity={0.2} name="Total Invested" />
@@ -353,12 +353,12 @@ function InvestmentView({ selectedAssets, onUpdate }) {
 
           {/* Drawdown Chart */}
           <div className="chart-panel">
-            <h4 className="panel-title">📉 DRAWDOWN OVER TIME</h4>
+            <h4 className="panel-title">DRAWDOWN OVER TIME</h4>
             <ResponsiveContainer width="100%" height={200}>
-              <ComposedChart data={investmentData.timeline}>
+              <ComposedChart data={investmentData.timeline} margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
                 <XAxis dataKey="date" tickFormatter={formatDate} stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 10 }} interval="preserveStartEnd" />
-                <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `-${v.toFixed(0)}%`} width={60} domain={[0, 'dataMax']} reversed />
+                <YAxis stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={(v) => `-${v.toFixed(0)}%`} width={70} domain={[0, 'dataMax']} reversed />
                 <ReferenceLine y={0} stroke="#6b7280" />
                 <Tooltip formatter={(v) => [`-${v?.toFixed(2)}%`, 'Drawdown']} labelFormatter={formatDate} contentStyle={{ background: '#0d1117', border: '1px solid #30363d' }} />
                 <Area type="monotone" dataKey="drawdown" stroke="#ef4444" fill="#ef4444" fillOpacity={0.3} name="Drawdown" />
@@ -368,13 +368,13 @@ function InvestmentView({ selectedAssets, onUpdate }) {
 
           {/* Price Chart */}
           <div className="chart-panel">
-            <h4 className="panel-title">💹 ASSET PRICE & SHARES OWNED</h4>
+            <h4 className="panel-title">ASSET PRICE & SHARES OWNED</h4>
             <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={investmentData.timeline}>
+              <ComposedChart data={investmentData.timeline} margin={{ left: 10, right: 10, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
                 <XAxis dataKey="date" tickFormatter={formatDate} stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis yAxisId="price" stroke="#6b7280" tick={{ fill: '#6b7280', fontSize: 10 }} tickFormatter={formatPrice} width={70} />
-                <YAxis yAxisId="shares" orientation="right" stroke="#ff6b00" tick={{ fill: '#ff6b00', fontSize: 10 }} tickFormatter={(v) => v?.toFixed(2)} width={70} />
+                <YAxis yAxisId="shares" orientation="right" stroke="#ff6b00" tick={{ fill: '#ff6b00', fontSize: 10 }} tickFormatter={(v) => v?.toFixed(2)} width={60} />
                 <Tooltip formatter={(v, name) => name === 'Price' ? [formatPrice(v), name] : [v?.toFixed(4), name]} labelFormatter={formatDate} contentStyle={{ background: '#0d1117', border: '1px solid #30363d' }} />
                 <Legend />
                 <Line type="monotone" dataKey="price" stroke="#00d4ff" strokeWidth={2} dot={false} yAxisId="price" name="Price" />

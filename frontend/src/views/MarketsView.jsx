@@ -103,7 +103,7 @@ function MarketsView({ selectedAssets, onUpdate }) {
 
       {error && (
         <div className="error-banner animate-slide-in">
-          <span className="error-icon">⚠</span>
+          <span className="error-icon">!</span>
           <span>{error}</span>
         </div>
       )}

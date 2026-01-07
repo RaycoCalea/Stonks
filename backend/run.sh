@@ -2,10 +2,19 @@
 # Stonks Terminal Backend Startup Script
 # Suppresses Intel MKL warnings and starts the server
 
-# Suppress Intel MKL warnings
-export MKL_SERVICE_FORCE_INTEL=0
+# Suppress Intel MKL warnings - comprehensive settings
+export MKL_SERVICE_FORCE_INTEL=1
+export MKL_THREADING_LAYER=sequential
 export MKL_DEBUG_CPU_TYPE=5
 export MKL_CBWR=AUTO
+export MKL_DYNAMIC=FALSE
+export KMP_WARNINGS=0
+export KMP_AFFINITY=disabled
+export OPENBLAS_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+
+# Suppress Python warnings
+export PYTHONWARNINGS="ignore"
 
 # Optional: Set API keys for higher rate limits
 # export ALPHA_VANTAGE_KEY="your_key_here"
@@ -14,7 +23,7 @@ export MKL_CBWR=AUTO
 
 echo "Starting Stonks Terminal API v4.0..."
 echo "=================================="
-echo "Sources: Yahoo HTTP, CoinGecko, Alpha Vantage"
+echo "Sources: Yahoo HTTP, CoinGecko, Alpha Vantage, FRED"
 echo ""
 
 # Start uvicorn

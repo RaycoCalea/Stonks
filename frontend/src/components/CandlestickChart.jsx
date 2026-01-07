@@ -185,7 +185,7 @@ function CandlestickChart({ data, assetType, title }) {
     <div className="candlestick-panel">
       <div className="chart-header">
         <div className="chart-title">
-          <span className="chart-icon">📊</span>
+          <span className="chart-icon">#</span>
           <span>{title || 'PRICE HISTORY'}</span>
         </div>
         {!useFallback && (

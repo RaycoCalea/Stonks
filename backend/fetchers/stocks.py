@@ -33,7 +33,7 @@ class StockFetcher:
     
     @staticmethod
     def fetch_data(ticker: str) -> Dict[str, Any]:
-        """Fetch stock quote data"""
+        """Fetch comprehensive stock quote data"""
         resolved = StockFetcher.resolve(ticker)
         cache_key = f"stock:{resolved}"
         
@@ -41,7 +41,14 @@ class StockFetcher:
         if cached:
             return cached
         
-        # Try Twelve Data first (most reliable)
+        # Try yfinance first for comprehensive data
+        result = StockFetcher._fetch_yfinance_full(resolved)
+        if result.get('current_price'):
+            result['asset_type'] = 'stock'
+            set_cache(cache_key, result)
+            return result
+        
+        # Fallback to Twelve Data
         result = StockFetcher._fetch_twelve_data(resolved)
         if result.get('current_price'):
             result['asset_type'] = 'stock'
@@ -56,6 +63,149 @@ class StockFetcher:
             return result
         
         return {"ticker": resolved, "error": "No data available", "asset_type": "stock"}
+    
+    @staticmethod
+    def _fetch_yfinance_full(ticker: str) -> Dict[str, Any]:
+        """Fetch comprehensive data using yfinance"""
+        try:
+            import yfinance as yf
+            print(f"[STOCK YF FULL] Fetching {ticker}")
+            
+            stock = yf.Ticker(ticker)
+            info = stock.info
+            
+            if not info or not info.get('regularMarketPrice'):
+                return {}
+            
+            current_price = info.get('regularMarketPrice') or info.get('currentPrice')
+            previous_close = info.get('regularMarketPreviousClose') or info.get('previousClose')
+            
+            result = {
+                "ticker": ticker,
+                "source": "yfinance",
+                
+                # Basic Info
+                "name": info.get('longName') or info.get('shortName') or ticker,
+                "sector": info.get('sector'),
+                "industry": info.get('industry'),
+                "description": info.get('longBusinessSummary', '')[:800] if info.get('longBusinessSummary') else None,
+                "website": info.get('website'),
+                "country": info.get('country'),
+                "employees": info.get('fullTimeEmployees'),
+                
+                # Price Data
+                "current_price": current_price,
+                "open_price": info.get('regularMarketOpen') or info.get('open'),
+                "day_high": info.get('regularMarketDayHigh') or info.get('dayHigh'),
+                "day_low": info.get('regularMarketDayLow') or info.get('dayLow'),
+                "previous_close": previous_close,
+                "price_change": (current_price - previous_close) if current_price and previous_close else None,
+                "price_change_percent": ((current_price - previous_close) / previous_close * 100) if current_price and previous_close else None,
+                
+                # 52 Week
+                "fifty_two_week_high": info.get('fiftyTwoWeekHigh'),
+                "fifty_two_week_low": info.get('fiftyTwoWeekLow'),
+                "pct_from_52w_high": ((current_price - info.get('fiftyTwoWeekHigh', 0)) / info.get('fiftyTwoWeekHigh', 1) * 100) if current_price and info.get('fiftyTwoWeekHigh') else None,
+                
+                # Moving Averages
+                "ma_50": info.get('fiftyDayAverage'),
+                "ma_200": info.get('twoHundredDayAverage'),
+                "above_ma_50": current_price > info.get('fiftyDayAverage', 0) if current_price and info.get('fiftyDayAverage') else None,
+                "above_ma_200": current_price > info.get('twoHundredDayAverage', 0) if current_price and info.get('twoHundredDayAverage') else None,
+                
+                # Volume
+                "volume": info.get('regularMarketVolume') or info.get('volume'),
+                "avg_volume": info.get('averageVolume'),
+                "avg_volume_10d": info.get('averageVolume10days'),
+                
+                # Market Data
+                "market_cap": info.get('marketCap'),
+                "enterprise_value": info.get('enterpriseValue'),
+                "exchange": info.get('exchange'),
+                "currency": info.get('currency', 'USD'),
+                
+                # Valuation
+                "pe_ratio": info.get('trailingPE'),
+                "forward_pe": info.get('forwardPE'),
+                "peg_ratio": info.get('pegRatio'),
+                "price_to_book": info.get('priceToBook'),
+                "price_to_sales": info.get('priceToSalesTrailing12Months'),
+                "ev_to_revenue": info.get('enterpriseToRevenue'),
+                "ev_to_ebitda": info.get('enterpriseToEbitda'),
+                
+                # Profitability
+                "profit_margin": info.get('profitMargins'),
+                "operating_margin": info.get('operatingMargins'),
+                "gross_margin": info.get('grossMargins'),
+                "ebitda_margin": info.get('ebitdaMargins'),
+                
+                # Returns
+                "return_on_assets": info.get('returnOnAssets'),
+                "return_on_equity": info.get('returnOnEquity'),
+                
+                # Income Statement
+                "revenue": info.get('totalRevenue'),
+                "revenue_per_share": info.get('revenuePerShare'),
+                "revenue_growth": info.get('revenueGrowth'),
+                "gross_profit": info.get('grossProfits'),
+                "ebitda": info.get('ebitda'),
+                "net_income": info.get('netIncomeToCommon'),
+                "earnings_growth": info.get('earningsGrowth'),
+                
+                # EPS
+                "eps": info.get('trailingEps'),
+                "forward_eps": info.get('forwardEps'),
+                "eps_growth": info.get('earningsQuarterlyGrowth'),
+                
+                # Balance Sheet
+                "total_cash": info.get('totalCash'),
+                "total_cash_per_share": info.get('totalCashPerShare'),
+                "total_debt": info.get('totalDebt'),
+                "debt_to_equity": info.get('debtToEquity'),
+                "current_ratio": info.get('currentRatio'),
+                "quick_ratio": info.get('quickRatio'),
+                "book_value": info.get('bookValue'),
+                
+                # Cash Flow
+                "operating_cash_flow": info.get('operatingCashflow'),
+                "free_cash_flow": info.get('freeCashflow'),
+                
+                # Dividends
+                "dividend_rate": info.get('dividendRate'),
+                "dividend_yield": info.get('dividendYield'),
+                "payout_ratio": info.get('payoutRatio'),
+                "ex_dividend_date": info.get('exDividendDate'),
+                
+                # Risk
+                "beta": info.get('beta'),
+                "beta_3y": info.get('beta3Year'),
+                
+                # Shares
+                "shares_outstanding": info.get('sharesOutstanding'),
+                "float_shares": info.get('floatShares'),
+                "shares_short": info.get('sharesShort'),
+                "short_ratio": info.get('shortRatio'),
+                "short_percent_float": info.get('shortPercentOfFloat'),
+                
+                # Ownership
+                "held_by_insiders": info.get('heldPercentInsiders'),
+                "held_by_institutions": info.get('heldPercentInstitutions'),
+                
+                # Targets
+                "target_high": info.get('targetHighPrice'),
+                "target_low": info.get('targetLowPrice'),
+                "target_mean": info.get('targetMeanPrice'),
+                "target_median": info.get('targetMedianPrice'),
+                "analyst_recommendation": info.get('recommendationKey'),
+                "analyst_count": info.get('numberOfAnalystOpinions'),
+            }
+            
+            print(f"[STOCK YF FULL] Success: {ticker} - ${current_price}")
+            return result
+            
+        except Exception as e:
+            print(f"[STOCK YF FULL] Error: {e}")
+            return {}
     
     @staticmethod
     def _fetch_twelve_data(ticker: str) -> Dict[str, Any]:

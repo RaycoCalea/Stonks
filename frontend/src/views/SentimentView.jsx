@@ -71,27 +71,27 @@ function SentimentView({ selectedAssets, onUpdate }) {
 
   const getSentimentIcon = (label) => {
     switch (label) {
-      case 'positive': return '🟢'
-      case 'negative': return '🔴'
-      default: return '⚪'
+      case 'positive': return '+'
+      case 'negative': return '-'
+      default: return 'o'
     }
   }
 
-  const getSentimentEmoji = (overall) => {
+  const getSentimentLabel = (overall) => {
     switch (overall) {
-      case 'VERY BULLISH': return '🚀'
-      case 'BULLISH': return '🐂'
-      case 'VERY BEARISH': return '💀'
-      case 'BEARISH': return '🐻'
-      default: return '😐'
+      case 'VERY BULLISH': return 'VERY BULLISH'
+      case 'BULLISH': return 'BULLISH'
+      case 'VERY BEARISH': return 'VERY BEARISH'
+      case 'BEARISH': return 'BEARISH'
+      default: return 'NEUTRAL'
     }
   }
 
   const getTrendIcon = (trend) => {
     switch (trend) {
-      case 'IMPROVING': return '📈'
-      case 'DETERIORATING': return '📉'
-      default: return '➡️'
+      case 'IMPROVING': return '^'
+      case 'DETERIORATING': return 'v'
+      default: return '-'
     }
   }
 
@@ -130,7 +130,7 @@ function SentimentView({ selectedAssets, onUpdate }) {
       {/* Controls */}
       <div className="sentiment-controls">
         <div className="sentiment-header">
-          <h3 className="section-title">📰 SENTIMENT ANALYSIS</h3>
+          <h3 className="section-title">SENTIMENT ANALYSIS</h3>
           <span className="scan-info">30-day lookback • 8+ sources</span>
         </div>
 
@@ -152,13 +152,13 @@ function SentimentView({ selectedAssets, onUpdate }) {
         )}
 
         <div className="info-text">
-          💡 Scans Google News, Yahoo Finance, Reddit, StockTwits, Finviz, Seeking Alpha & more.
+          Scans Google News, Yahoo Finance, Reddit, StockTwits, Finviz, Seeking Alpha & more.
         </div>
       </div>
 
       {error && (
         <div className="error-banner">
-          <span className="error-icon">⚠</span>
+          <span className="error-icon">!</span>
           <span>{error}</span>
         </div>
       )}
@@ -172,14 +172,14 @@ function SentimentView({ selectedAssets, onUpdate }) {
 
       {selectedAssets.length === 0 && !loading && (
         <div className="sentiment-prompt">
-          <div className="prompt-icon">📰</div>
+          <div className="prompt-icon">N</div>
           <h3>Select an asset above</h3>
           <p>Use the search bar to select an asset for sentiment analysis</p>
           <div className="feature-list">
-            <div className="feature">🔍 Search by ticker or keyword</div>
-            <div className="feature">📈 Cumulative +1/-1 scoring</div>
-            <div className="feature">📊 Sentiment timeline & trends</div>
-            <div className="feature">🐂 / 🐻 Bullish/Bearish signals</div>
+            <div className="feature">Search by ticker or keyword</div>
+            <div className="feature">Cumulative +1/-1 scoring</div>
+            <div className="feature">Sentiment timeline & trends</div>
+            <div className="feature">Bullish/Bearish signals</div>
           </div>
           <div className="source-list">
             <span className="source-tag">Google News</span>
@@ -197,7 +197,7 @@ function SentimentView({ selectedAssets, onUpdate }) {
           {/* Overall Sentiment */}
           <div className="overall-sentiment">
             <div className="sentiment-hero">
-              <span className="sentiment-emoji">{getSentimentEmoji(sentimentData.aggregate.overall)}</span>
+              <span className="sentiment-indicator">{getSentimentLabel(sentimentData.aggregate.overall)}</span>
               <div className="sentiment-info">
                 <span className="sentiment-label">{sentimentData.aggregate.overall}</span>
                 <span className="sentiment-signal">
@@ -231,7 +231,7 @@ function SentimentView({ selectedAssets, onUpdate }) {
           {/* Sources */}
           {sentimentData.sources_scanned && (
             <div className="sources-info">
-              <span className="sources-label">📡 Sources:</span>
+              <span className="sources-label">Sources:</span>
               {sentimentData.sources_scanned.map((src, i) => (
                 <span key={i} className="source-badge">{src}</span>
               ))}
@@ -241,27 +241,27 @@ function SentimentView({ selectedAssets, onUpdate }) {
           {/* Stats Grid */}
           <div className="sentiment-stats">
             <div className="stat-card positive">
-              <span className="stat-icon">🟢</span>
+              <span className="stat-icon">+</span>
               <span className="stat-value">{sentimentData.aggregate.positive_count}</span>
               <span className="stat-label">Positive (+1)</span>
             </div>
             <div className="stat-card negative">
-              <span className="stat-icon">🔴</span>
+              <span className="stat-icon">-</span>
               <span className="stat-value">{sentimentData.aggregate.negative_count}</span>
               <span className="stat-label">Negative (-1)</span>
             </div>
             <div className="stat-card neutral">
-              <span className="stat-icon">⚪</span>
+              <span className="stat-icon">o</span>
               <span className="stat-value">{sentimentData.aggregate.neutral_count}</span>
               <span className="stat-label">Neutral (0)</span>
             </div>
             <div className="stat-card total">
-              <span className="stat-icon">📰</span>
+              <span className="stat-icon">#</span>
               <span className="stat-value">{sentimentData.articles_analyzed}</span>
               <span className="stat-label">Total</span>
             </div>
             <div className="stat-card cumulative">
-              <span className="stat-icon">📊</span>
+              <span className="stat-icon">=</span>
               <span 
                 className="stat-value"
                 style={{ color: getCumulativeColor(sentimentData.aggregate.cumulative_score) }}
@@ -275,7 +275,7 @@ function SentimentView({ selectedAssets, onUpdate }) {
           {/* Cumulative Sentiment Timeline */}
           {sentimentData.timeline && sentimentData.timeline.length > 0 && (
             <div className="chart-panel timeline-panel">
-              <h4 className="panel-title">📈 CUMULATIVE SENTIMENT (Running +1/-1 Total)</h4>
+              <h4 className="panel-title">CUMULATIVE SENTIMENT (Running +1/-1 Total)</h4>
               <ResponsiveContainer width="100%" height={250}>
                 <ComposedChart data={sentimentData.timeline} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
@@ -299,7 +299,7 @@ function SentimentView({ selectedAssets, onUpdate }) {
           {sentimentData.timeline && sentimentData.timeline.length > 0 && (
             <div className="chart-panel timeline-panel">
               <h4 className="panel-title">
-                📊 SENTIMENT SCORE OVER TIME
+                SENTIMENT SCORE OVER TIME
                 {sentimentData.aggregate.trend && (
                   <span className={`trend-badge ${sentimentData.aggregate.trend.toLowerCase()}`}>
                     {getTrendIcon(sentimentData.aggregate.trend)} {sentimentData.aggregate.trend}
@@ -335,7 +335,7 @@ function SentimentView({ selectedAssets, onUpdate }) {
           {/* Pie Chart */}
           {pieData.length > 0 && (
             <div className="chart-panel">
-              <h4 className="panel-title">📊 SENTIMENT DISTRIBUTION</h4>
+              <h4 className="panel-title">SENTIMENT DISTRIBUTION</h4>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
@@ -351,7 +351,7 @@ function SentimentView({ selectedAssets, onUpdate }) {
 
           {/* News Feed */}
           <div className="news-panel">
-            <h4 className="panel-title">📰 NEWS TIMELINE (Newest First)</h4>
+            <h4 className="panel-title">NEWS TIMELINE (Newest First)</h4>
             <div className="news-timeline">
               {sentimentData.news.map((article, i) => {
                 const score = article.sentiment?.score || 0

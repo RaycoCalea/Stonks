@@ -128,7 +128,7 @@ function PriceChart({ data, assetType }) {
     <div className="chart-panel full-width">
       <div className="chart-header">
         <div className="chart-title">
-          <span className="chart-icon">📊</span>
+          <span className="chart-icon">#</span>
           <span>PRICE HISTORY</span>
         </div>
         <div className={`chart-change ${isPositive ? 'positive' : 'negative'}`}>

@@ -3,9 +3,16 @@ Stonks Terminal API - Main Orchestrator
 FastAPI backend for fetching financial data across multiple asset classes
 """
 
-# Suppress Intel MKL warnings
+# Suppress Intel MKL warnings - MUST BE BEFORE numpy/scipy imports
 import os
-os.environ['MKL_SERVICE_FORCE_INTEL'] = '0'
+os.environ['MKL_SERVICE_FORCE_INTEL'] = '1'
+os.environ['MKL_THREADING_LAYER'] = 'sequential'
+os.environ['KMP_WARNINGS'] = '0'
+os.environ['MKL_DEBUG_CPU_TYPE'] = '5'
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
+import warnings
+warnings.filterwarnings('ignore')
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -417,6 +424,34 @@ async def search_assets(query: str):
             unique_results.append(r)
     
     return unique_results[:15]
+
+
+# ==================== MACRO DEEP ANALYSIS ENDPOINT ====================
+
+class MacroAnalysisRequest(BaseModel):
+    lookback_period: str = "10y"
+    asset_class_filter: Optional[str] = None
+    include_user_assets: Optional[List[Dict[str, str]]] = None
+
+@app.post("/api/macro/deep-analysis")
+async def run_macro_deep_analysis(request: MacroAnalysisRequest):
+    """
+    Run comprehensive macro analysis across all asset classes.
+    Extracts long-term historical data, calculates statistics,
+    and exports to Parquet format.
+    """
+    from fetchers.macro_analysis import run_macro_analysis
+    
+    result = run_macro_analysis(
+        lookback_period=request.lookback_period,
+        asset_class_filter=request.asset_class_filter,
+        include_user_assets=request.include_user_assets
+    )
+    
+    if result.get("error"):
+        raise HTTPException(status_code=400, detail=result["error"])
+    
+    return result
 
 
 # ==================== HEALTH CHECK ====================

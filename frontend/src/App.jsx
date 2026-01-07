@@ -6,6 +6,7 @@ import AnalysisView from './views/AnalysisView'
 import ForecastView from './views/ForecastView'
 import InvestmentView from './views/InvestmentView'
 import SentimentView from './views/SentimentView'
+import MacroView from './views/MacroView'
 import StatusBar from './components/StatusBar'
 import './App.css'
 
@@ -21,6 +22,7 @@ function App() {
     { id: 'forecast', label: 'Forecast' },
     { id: 'investment', label: 'Investment' },
     { id: 'sentiment', label: 'Sentiment' },
+    { id: 'macro', label: 'Macro' },
   ]
 
   const handleUpdate = (data) => {
@@ -85,6 +87,13 @@ function App() {
 
         {activeTab === 'sentiment' && (
           <SentimentView 
+            selectedAssets={selectedAssets}
+            onUpdate={handleUpdate}
+          />
+        )}
+
+        {activeTab === 'macro' && (
+          <MacroView 
             selectedAssets={selectedAssets}
             onUpdate={handleUpdate}
           />

@@ -83,7 +83,7 @@ function AnalysisView({ selectedAssets, onUpdate }) {
       {/* Controls */}
       <div className="analysis-controls">
         <div className="analysis-header">
-          <h3 className="section-title">🔬 MULTI-ASSET ANALYSIS</h3>
+          <h3 className="section-title">MULTI-ASSET ANALYSIS</h3>
           <span className="asset-count">
             {selectedAssets.length} asset{selectedAssets.length !== 1 ? 's' : ''} selected
             {selectedAssets.length < 2 && ' (need at least 2)'}
@@ -121,7 +121,7 @@ function AnalysisView({ selectedAssets, onUpdate }) {
 
       {error && (
         <div className="error-banner">
-          <span className="error-icon">⚠</span>
+          <span className="error-icon">!</span>
           <span>{error}</span>
         </div>
       )}
@@ -137,7 +137,7 @@ function AnalysisView({ selectedAssets, onUpdate }) {
         <div className="analysis-results">
           {/* Statistics Panel */}
           <div className="stats-panel">
-            <h3 className="panel-title">📈 COMPREHENSIVE STATISTICS</h3>
+            <h3 className="panel-title">COMPREHENSIVE STATISTICS</h3>
             <div className="stats-grid">
               {analysisData.tickers.map((ticker, i) => (
                 <div key={ticker} className="stat-card" style={{ borderTopColor: ASSET_COLORS[i] }}>
@@ -201,7 +201,7 @@ function AnalysisView({ selectedAssets, onUpdate }) {
 
           {/* Correlation Matrix */}
           <div className="correlation-panel">
-            <h3 className="panel-title">🔗 CORRELATION MATRIX</h3>
+            <h3 className="panel-title">CORRELATION MATRIX</h3>
             <div className="correlation-matrix">
               <table>
                 <thead>
@@ -235,10 +235,10 @@ function AnalysisView({ selectedAssets, onUpdate }) {
 
           {/* Log Price Chart */}
           <div className="chart-panel">
-            <h3 className="panel-title">📊 NORMALIZED PRICES (Base = 100)</h3>
+            <h3 className="panel-title">NORMALIZED PRICES (Base = 100)</h3>
             <div className="chart-container">
               <ResponsiveContainer width="100%" height={450}>
-                <LineChart data={analysisData.chart_data}>
+                <LineChart data={analysisData.chart_data} margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
                   <XAxis 
                     dataKey="date" 
@@ -251,7 +251,7 @@ function AnalysisView({ selectedAssets, onUpdate }) {
                     stroke="#6b7280"
                     tick={{ fill: '#6b7280', fontSize: 10 }}
                     tickFormatter={(v) => v?.toFixed(0)}
-                    width={60}
+                    width={70}
                     domain={['dataMin - 10', 'dataMax + 10']}
                   />
                   <Tooltip content={<CustomTooltip />} />
@@ -278,7 +278,7 @@ function AnalysisView({ selectedAssets, onUpdate }) {
 
           {/* Trend Lines Chart */}
           <div className="chart-panel">
-            <h3 className="panel-title">📐 TREND LINES (Support & Resistance)</h3>
+            <h3 className="panel-title">TREND LINES (Support & Resistance)</h3>
             {analysisData.tickers.map((ticker, idx) => (
               <TrendLineChart 
                 key={ticker}
@@ -290,12 +290,202 @@ function AnalysisView({ selectedAssets, onUpdate }) {
               />
             ))}
           </div>
+
+          {/* Drawdown Comparison Chart */}
+          <div className="chart-panel">
+            <h3 className="panel-title">DRAWDOWN COMPARISON</h3>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={analysisData.chart_data} margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={formatDate}
+                    stroke="#6b7280"
+                    tick={{ fill: '#6b7280', fontSize: 10 }}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis 
+                    stroke="#6b7280"
+                    tick={{ fill: '#6b7280', fontSize: 10 }}
+                    tickFormatter={(v) => `-${Math.abs(v).toFixed(0)}%`}
+                    width={60}
+                    domain={[0, 'dataMax']}
+                    reversed
+                  />
+                  <Tooltip 
+                    formatter={(v, name) => [`-${Math.abs(v).toFixed(2)}%`, name.replace('_dd', '')]}
+                    labelFormatter={(l) => l}
+                    contentStyle={{ background: '#0d1117', border: '1px solid #30363d' }}
+                  />
+                  <Legend 
+                    formatter={(value) => <span style={{ color: '#c9d1d9' }}>{value.replace('_dd', '')}</span>}
+                  />
+                  {analysisData.tickers.map((ticker, i) => (
+                    <Line
+                      key={`${ticker}_dd`}
+                      type="monotone"
+                      dataKey={`${ticker}_dd`}
+                      stroke={ASSET_COLORS[i]}
+                      strokeWidth={2}
+                      dot={false}
+                      name={`${ticker}_dd`}
+                      connectNulls
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Rolling Volatility Chart */}
+          <div className="chart-panel">
+            <h3 className="panel-title">ROLLING VOLATILITY (20-Day)</h3>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={analysisData.chart_data} margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={formatDate}
+                    stroke="#6b7280"
+                    tick={{ fill: '#6b7280', fontSize: 10 }}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis 
+                    stroke="#6b7280"
+                    tick={{ fill: '#6b7280', fontSize: 10 }}
+                    tickFormatter={(v) => `${(v * 100).toFixed(0)}%`}
+                    width={60}
+                  />
+                  <Tooltip 
+                    formatter={(v, name) => [`${(v * 100).toFixed(2)}%`, name.replace('_vol', ' Vol')]}
+                    labelFormatter={(l) => l}
+                    contentStyle={{ background: '#0d1117', border: '1px solid #30363d' }}
+                  />
+                  <Legend 
+                    formatter={(value) => <span style={{ color: '#c9d1d9' }}>{value.replace('_vol', ' Volatility')}</span>}
+                  />
+                  {analysisData.tickers.map((ticker, i) => (
+                    <Line
+                      key={`${ticker}_vol`}
+                      type="monotone"
+                      dataKey={`${ticker}_vol`}
+                      stroke={ASSET_COLORS[i]}
+                      strokeWidth={2}
+                      dot={false}
+                      name={`${ticker}_vol`}
+                      connectNulls
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Rolling Correlation Chart */}
+          {analysisData.rolling_correlations && Object.keys(analysisData.rolling_correlations).length > 0 && (
+            <div className="chart-panel">
+              <h3 className="panel-title">ROLLING CORRELATION (20-Day)</h3>
+              <div className="chart-container">
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={analysisData.chart_data} margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
+                    <XAxis 
+                      dataKey="date" 
+                      tickFormatter={formatDate}
+                      stroke="#6b7280"
+                      tick={{ fill: '#6b7280', fontSize: 10 }}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis 
+                      stroke="#6b7280"
+                      tick={{ fill: '#6b7280', fontSize: 10 }}
+                      domain={[-1, 1]}
+                      tickFormatter={(v) => v.toFixed(1)}
+                      width={40}
+                    />
+                    <Tooltip 
+                      formatter={(v, name) => [v?.toFixed(3), name.replace('corr_', '').replace('_vs_', ' vs ')]}
+                      labelFormatter={(l) => l}
+                      contentStyle={{ background: '#0d1117', border: '1px solid #30363d' }}
+                    />
+                    <Legend 
+                      formatter={(value) => <span style={{ color: '#c9d1d9' }}>{value.replace('corr_', '').replace('_vs_', ' vs ')}</span>}
+                    />
+                    {Object.keys(analysisData.rolling_correlations).map((key, i) => (
+                      <Line
+                        key={`corr_${key}`}
+                        type="monotone"
+                        dataKey={`corr_${key}`}
+                        stroke={ASSET_COLORS[i % ASSET_COLORS.length]}
+                        strokeWidth={2}
+                        dot={false}
+                        name={`corr_${key}`}
+                        connectNulls
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* Risk Comparison Panel */}
+          <div className="risk-comparison-panel">
+            <h3 className="panel-title">RISK-ADJUSTED PERFORMANCE RANKING</h3>
+            <div className="ranking-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Asset</th>
+                    <th>Return</th>
+                    <th>Volatility</th>
+                    <th>Sharpe</th>
+                    <th>Sortino</th>
+                    <th>Max DD</th>
+                    <th>Risk Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analysisData.tickers
+                    .map((ticker, i) => ({
+                      ticker,
+                      color: ASSET_COLORS[i],
+                      ...analysisData.statistics[ticker]
+                    }))
+                    .sort((a, b) => (b.sharpe_ratio || 0) - (a.sharpe_ratio || 0))
+                    .map((asset, rank) => (
+                      <tr key={asset.ticker}>
+                        <td className="rank">{rank + 1}</td>
+                        <td style={{ color: asset.color }}>{asset.ticker}</td>
+                        <td className={asset.total_return >= 0 ? 'positive' : 'negative'}>
+                          {asset.total_return?.toFixed(2)}%
+                        </td>
+                        <td>{asset.volatility?.toFixed(2)}%</td>
+                        <td className={asset.sharpe_ratio >= 0 ? 'positive' : 'negative'}>
+                          {asset.sharpe_ratio?.toFixed(3)}
+                        </td>
+                        <td className={asset.sortino_ratio >= 0 ? 'positive' : 'negative'}>
+                          {asset.sortino_ratio?.toFixed(3)}
+                        </td>
+                        <td className="negative">-{asset.max_drawdown?.toFixed(2)}%</td>
+                        <td className={getRiskClass(asset.volatility)}>
+                          {getRiskLabel(asset.volatility)}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
       {selectedAssets.length < 2 && !loading && (
         <div className="analysis-prompt">
-          <div className="prompt-icon">🔬</div>
+          <div className="prompt-icon">+</div>
           <h3>Select at least 2 assets</h3>
           <p>Use the search bar above to add assets for comparison</p>
           <div className="prompt-suggestions">
@@ -319,6 +509,22 @@ function getCorrelationClass(val) {
   if (val >= -0.3) return 'neutral'
   if (val >= -0.7) return 'medium-negative'
   return 'high-negative'
+}
+
+function getRiskClass(volatility) {
+  if (!volatility) return 'unknown'
+  if (volatility < 15) return 'low-risk'
+  if (volatility < 30) return 'medium-risk'
+  if (volatility < 50) return 'high-risk'
+  return 'extreme-risk'
+}
+
+function getRiskLabel(volatility) {
+  if (!volatility) return 'N/A'
+  if (volatility < 15) return 'LOW'
+  if (volatility < 30) return 'MEDIUM'
+  if (volatility < 50) return 'HIGH'
+  return 'EXTREME'
 }
 
 function CustomTooltip({ active, payload, label }) {
@@ -353,34 +559,54 @@ function TrendLineChart({ ticker, dates, prices, trendLines, color }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
-  // Calculate extended trend lines that reach chart borders
+  // Calculate price bounds from actual prices
   const validPrices = chartData.map(d => d.price).filter(p => p > 0)
-  const minPrice = Math.min(...validPrices) * 0.9
-  const maxPrice = Math.max(...validPrices) * 1.1
-  const totalDays = chartData.length
+  let minPrice = Math.min(...validPrices)
+  let maxPrice = Math.max(...validPrices)
 
-  const extendLine = (point1, point2) => {
-    if (!point1 || !point2) return null
+  // Create straight trend line from two points, extended across entire chart
+  const createStraightLine = (lineData) => {
+    if (!lineData || !lineData.point1 || !lineData.point2) return { values: null, extents: null }
     
-    const idx1 = point1.index
-    const idx2 = point2.index
-    const p1 = point1.price
-    const p2 = point2.price
+    const p1 = lineData.point1
+    const p2 = lineData.point2
     
-    if (idx2 === idx1) return null
+    if (p2.index === p1.index) return { values: null, extents: null }
     
-    const slope = (p2 - p1) / (idx2 - idx1)
+    // Calculate slope in index space
+    const slope = (p2.price - p1.price) / (p2.index - p1.index)
     
-    // Create line data points
-    return chartData.map((d, i) => {
-      const linePrice = p1 + slope * (i - idx1)
+    // Calculate the line values across all chart data points
+    const lineValues = chartData.map((d) => {
+      const linePrice = p1.price + slope * (d.index - p1.index)
+      // Only return positive values (needed for log scale)
       return linePrice > 0 ? linePrice : null
     })
+    
+    // Get the min/max of the line for domain expansion
+    const validLineValues = lineValues.filter(v => v !== null && v > 0)
+    const lineMin = validLineValues.length > 0 ? Math.min(...validLineValues) : null
+    const lineMax = validLineValues.length > 0 ? Math.max(...validLineValues) : null
+    
+    return { values: lineValues, extents: { min: lineMin, max: lineMax } }
   }
 
-  // Add extended trend line data to chart
-  const supportLine = trendLines?.support ? extendLine(trendLines.support.point1, trendLines.support.point2) : null
-  const resistanceLine = trendLines?.resistance ? extendLine(trendLines.resistance.point1, trendLines.resistance.point2) : null
+  // Generate trend line data
+  const supportResult = createStraightLine(trendLines?.support)
+  const resistanceResult = createStraightLine(trendLines?.resistance)
+  
+  const supportLine = supportResult.values
+  const resistanceLine = resistanceResult.values
+
+  // Expand domain to include trend lines
+  if (supportResult.extents?.min) minPrice = Math.min(minPrice, supportResult.extents.min)
+  if (supportResult.extents?.max) maxPrice = Math.max(maxPrice, supportResult.extents.max)
+  if (resistanceResult.extents?.min) minPrice = Math.min(minPrice, resistanceResult.extents.min)
+  if (resistanceResult.extents?.max) maxPrice = Math.max(maxPrice, resistanceResult.extents.max)
+  
+  // Add some padding to the domain
+  minPrice = minPrice * 0.95
+  maxPrice = maxPrice * 1.05
 
   const enhancedChartData = chartData.map((d, i) => ({
     ...d,
@@ -394,44 +620,46 @@ function TrendLineChart({ ticker, dates, prices, trendLines, color }) {
         <span className="trend-ticker" style={{ color }}>{ticker}</span>
         {trendLines?.support && (
           <span className="trend-info support">
-            ▲ Support: {trendLines.support.point1.date} → {trendLines.support.point2.date}
+            Support: ${trendLines.support.point1.price?.toFixed(2)} - ${trendLines.support.point2.price?.toFixed(2)}
           </span>
         )}
         {trendLines?.resistance && (
           <span className="trend-info resistance">
-            ▼ Resistance: {trendLines.resistance.point1.date} → {trendLines.resistance.point2.date}
+            Resistance: ${trendLines.resistance.point1.price?.toFixed(2)} - ${trendLines.resistance.point2.price?.toFixed(2)}
           </span>
         )}
       </div>
       <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={enhancedChartData}>
+        <LineChart data={enhancedChartData} margin={{ left: 10, right: 30, top: 10, bottom: 10 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e2530" />
           <XAxis 
             dataKey="date" 
             tickFormatter={formatDate}
             stroke="#6b7280"
             tick={{ fill: '#6b7280', fontSize: 10 }}
+            interval="preserveStartEnd"
           />
           <YAxis 
             scale="log"
             domain={[minPrice, maxPrice]}
             stroke="#6b7280"
             tick={{ fill: '#6b7280', fontSize: 10 }}
-            tickFormatter={(v) => '$' + v.toLocaleString()}
-            width={80}
+            tickFormatter={(v) => '$' + v?.toLocaleString()}
+            width={70}
           />
           <Tooltip 
             formatter={(v, name) => {
-              if (name === 'price') return ['$' + v?.toLocaleString(), 'Price']
-              if (name === 'support') return ['$' + v?.toLocaleString(), 'Support Line']
-              if (name === 'resistance') return ['$' + v?.toLocaleString(), 'Resistance Line']
+              if (name === 'Price') return ['$' + v?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}), 'Price']
+              if (name === 'Support') return ['$' + v?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}), 'Support']
+              if (name === 'Resistance') return ['$' + v?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}), 'Resistance']
               return [v, name]
             }}
             labelFormatter={formatDate}
+            contentStyle={{ background: '#0d1117', border: '1px solid #30363d' }}
           />
           <Legend />
           <Line
-            type="monotone"
+            type="linear"
             dataKey="price"
             stroke={color}
             strokeWidth={2}
@@ -440,7 +668,7 @@ function TrendLineChart({ ticker, dates, prices, trendLines, color }) {
           />
           {supportLine && (
             <Line
-              type="monotone"
+              type="linear"
               dataKey="support"
               stroke="#00ff88"
               strokeWidth={2}
@@ -452,7 +680,7 @@ function TrendLineChart({ ticker, dates, prices, trendLines, color }) {
           )}
           {resistanceLine && (
             <Line
-              type="monotone"
+              type="linear"
               dataKey="resistance"
               stroke="#ff4757"
               strokeWidth={2}
