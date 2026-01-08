@@ -48,7 +48,41 @@ function MarketsView({ selectedAssets, onUpdate }) {
       const info = await infoRes.json()
       console.log('[DATA RECEIVED]', asset.type, info.current_price || info.name || info.id)
       
-      setAssetData({ type: asset.type, asset_type: asset.type, ticker: asset.ticker, ...info })
+      let combinedData = { type: asset.type, asset_type: asset.type, ticker: asset.ticker, ...info }
+      
+      // For stocks, also fetch financial statements
+      if (asset.type === 'stock' || asset.type === 'stocks') {
+        try {
+          const financialsRes = await fetch(`/api/stocks/${asset.ticker || asset.id}/financials`)
+          if (financialsRes.ok) {
+            const financials = await financialsRes.json()
+            console.log('[FINANCIALS RECEIVED]', asset.ticker, 
+              'income:', financials.income_annual?.length || 0,
+              'balance:', financials.balance_annual?.length || 0,
+              'cashflow:', financials.cashflow_annual?.length || 0
+            )
+            // Merge financials directly into combinedData (not nested)
+            combinedData = { 
+              ...combinedData, 
+              income_annual: financials.income_annual,
+              income_quarterly: financials.income_quarterly,
+              balance_annual: financials.balance_annual,
+              balance_quarterly: financials.balance_quarterly,
+              cashflow_annual: financials.cashflow_annual,
+              cashflow_quarterly: financials.cashflow_quarterly,
+              key_stats: financials.key_stats,
+              earnings_history: financials.earnings_history,
+              recommendations: financials.recommendations,
+              institutional_holders: financials.institutional_holders
+            }
+          }
+        } catch (finErr) {
+          console.warn('[FINANCIALS WARN]', finErr.message)
+          // Non-critical, continue without financials
+        }
+      }
+      
+      setAssetData(combinedData)
       setError(null)
       onUpdate?.({ type: asset.type, ...info })
       

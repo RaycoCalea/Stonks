@@ -293,6 +293,93 @@ MACRO_MAP = {
     "population": {"symbol": "POPTHM", "name": "US Population", "source": "FRED", "region": "US"},
     "us pop growth": {"symbol": "SPPOPGROWUSA", "name": "US Population Growth", "source": "FRED", "region": "US"},
     "world population": {"symbol": "SPPOPTOTLW", "name": "World Population", "source": "FRED", "region": "GLOBAL"},
+    
+    # ==================== WEATHER & CLIMATE DATA ====================
+    # Temperature Indices
+    "us temperature": {"symbol": "TEMP_US", "name": "US Average Temperature Anomaly", "source": "FRED", "region": "US"},
+    "heating degree days": {"symbol": "HDDHDD", "name": "Heating Degree Days", "source": "FRED", "region": "US"},
+    "cooling degree days": {"symbol": "CDDCDD", "name": "Cooling Degree Days", "source": "FRED", "region": "US"},
+    
+    # Climate & Drought
+    "drought index": {"symbol": "DSPI", "name": "Drought Severity & Coverage Index", "source": "FRED", "region": "US"},
+    "palmer drought": {"symbol": "DPDHI", "name": "Palmer Drought Severity Index", "source": "FRED", "region": "US"},
+    
+    # ==================== ENERGY DATA ====================
+    "natural gas storage": {"symbol": "NWGSPUS", "name": "Natural Gas Storage (US)", "source": "FRED", "region": "US"},
+    "crude oil stocks": {"symbol": "WCRSTUS1", "name": "Crude Oil Stocks (US)", "source": "FRED", "region": "US"},
+    "gasoline price": {"symbol": "GASREGW", "name": "Retail Gasoline Price (US)", "source": "FRED", "region": "US"},
+    "electricity consumption": {"symbol": "IPG2211A2N", "name": "Electric Power Generation", "source": "FRED", "region": "US"},
+    
+    # ==================== AGRICULTURE & FOOD ====================
+    "wheat price": {"symbol": "PWHEAMTUSDM", "name": "Wheat Price (Global)", "source": "FRED", "region": "GLOBAL"},
+    "corn price": {"symbol": "PMAIZMTUSDM", "name": "Corn Price (Global)", "source": "FRED", "region": "GLOBAL"},
+    "soybeans price": {"symbol": "PSOYBUSDQ", "name": "Soybeans Price", "source": "FRED", "region": "GLOBAL"},
+    "food price index": {"symbol": "PFOODINDEXM", "name": "Global Food Price Index", "source": "FRED", "region": "GLOBAL"},
+    "fertilizer price": {"symbol": "PFERTILIZERM", "name": "Fertilizer Price Index", "source": "FRED", "region": "GLOBAL"},
+    
+    # ==================== CREDIT & LENDING ====================
+    "credit card delinquency": {"symbol": "DRCCLACBS", "name": "Credit Card Delinquency Rate", "source": "FRED", "region": "US"},
+    "mortgage delinquency": {"symbol": "DRSFRMACBS", "name": "Mortgage Delinquency Rate", "source": "FRED", "region": "US"},
+    "commercial delinquency": {"symbol": "DRBLACBS", "name": "Commercial Loan Delinquency", "source": "FRED", "region": "US"},
+    "consumer credit": {"symbol": "TOTALSL", "name": "Total Consumer Credit", "source": "FRED", "region": "US"},
+    "auto loans": {"symbol": "MVLOAS", "name": "Auto Loans Outstanding", "source": "FRED", "region": "US"},
+    "student loans": {"symbol": "SLOAS", "name": "Student Loans Outstanding", "source": "FRED", "region": "US"},
+    
+    # ==================== REAL ESTATE ====================
+    "rental vacancy": {"symbol": "RRVRUSQ156N", "name": "Rental Vacancy Rate", "source": "FRED", "region": "US"},
+    "homeownership rate": {"symbol": "RSAHORUSQ156S", "name": "Homeownership Rate", "source": "FRED", "region": "US"},
+    "median rent": {"symbol": "MEDLISPRIPERSQUAM", "name": "Median Listing Price per SqFt", "source": "FRED", "region": "US"},
+    "construction spending": {"symbol": "TTLCONS", "name": "Total Construction Spending", "source": "FRED", "region": "US"},
+    
+    # ==================== BANKING & FINANCIAL ==================== 
+    "bank lending": {"symbol": "TOTLL", "name": "Total Bank Lending", "source": "FRED", "region": "US"},
+    "commercial loans": {"symbol": "BUSLOANS", "name": "Commercial & Industrial Loans", "source": "FRED", "region": "US"},
+    "bank reserves": {"symbol": "TOTRESNS", "name": "Total Bank Reserves", "source": "FRED", "region": "US"},
+    "excess reserves": {"symbol": "EXCSRESNS", "name": "Excess Reserves", "source": "FRED", "region": "US"},
+    "monetary velocity": {"symbol": "M2V", "name": "Velocity of M2 Money", "source": "FRED", "region": "US"},
+    "monetary base": {"symbol": "BOGMBASE", "name": "Monetary Base", "source": "FRED", "region": "US"},
+    
+    # ==================== TRADE & GLOBAL FLOWS ====================
+    "trade balance": {"symbol": "BOPGSTB", "name": "US Trade Balance", "source": "FRED", "region": "US"},
+    "imports": {"symbol": "BOPTIMP", "name": "US Imports", "source": "FRED", "region": "US"},
+    "exports": {"symbol": "BOPTEXP", "name": "US Exports", "source": "FRED", "region": "US"},
+    "container shipping": {"symbol": "HARPEX", "name": "Harper Petersen Charter Rates", "source": "FRED", "region": "GLOBAL"},
+    
+    # ==================== VOLATILITY & RISK ====================
+    "move index": {"symbol": "MOVE", "name": "MOVE Bond Volatility Index", "source": "YAHOO", "region": "US"},
+    "oil volatility": {"symbol": "OVX", "name": "Oil Volatility Index", "source": "YAHOO", "region": "GLOBAL"},
+    "gold volatility": {"symbol": "GVZ", "name": "Gold Volatility Index", "source": "YAHOO", "region": "GLOBAL"},
+    "currency volatility": {"symbol": "EUVIX", "name": "Euro Currency Volatility", "source": "YAHOO", "region": "EU"},
+    
+    # ==================== GOVERNMENT & POLICY ====================
+    "federal deficit": {"symbol": "FYFSD", "name": "Federal Surplus/Deficit", "source": "FRED", "region": "US"},
+    "federal spending": {"symbol": "FGEXPND", "name": "Federal Government Spending", "source": "FRED", "region": "US"},
+    "federal receipts": {"symbol": "FGRECPT", "name": "Federal Government Receipts", "source": "FRED", "region": "US"},
+    "defense spending": {"symbol": "FDEFX", "name": "Federal Defense Spending", "source": "FRED", "region": "US"},
+    
+    # ==================== LABOR MARKET DEPTH ====================
+    "job openings": {"symbol": "JTSJOL", "name": "Job Openings (JOLTS)", "source": "FRED", "region": "US"},
+    "quit rate": {"symbol": "JTSQUR", "name": "Quit Rate (JOLTS)", "source": "FRED", "region": "US"},
+    "hire rate": {"symbol": "JTSHIR", "name": "Hire Rate (JOLTS)", "source": "FRED", "region": "US"},
+    "layoffs": {"symbol": "JTSLDL", "name": "Layoffs Rate (JOLTS)", "source": "FRED", "region": "US"},
+    "labor participation": {"symbol": "CIVPART", "name": "Labor Force Participation", "source": "FRED", "region": "US"},
+    "employment ratio": {"symbol": "EMRATIO", "name": "Employment-Population Ratio", "source": "FRED", "region": "US"},
+    "u6 unemployment": {"symbol": "U6RATE", "name": "U6 Unemployment (Underemployment)", "source": "FRED", "region": "US"},
+    "avg hourly earnings": {"symbol": "CES0500000003", "name": "Average Hourly Earnings", "source": "FRED", "region": "US"},
+    "weekly hours": {"symbol": "AWHMAN", "name": "Avg Weekly Hours Manufacturing", "source": "FRED", "region": "US"},
+    
+    # ==================== MANUFACTURING & INDUSTRY ====================
+    "durable goods": {"symbol": "DGORDER", "name": "Durable Goods Orders", "source": "FRED", "region": "US"},
+    "factory orders": {"symbol": "AMTMNO", "name": "Manufacturing New Orders", "source": "FRED", "region": "US"},
+    "ism manufacturing": {"symbol": "NAPM", "name": "ISM Manufacturing PMI", "source": "FRED", "region": "US"},
+    "ism services": {"symbol": "NAPMNOI", "name": "ISM Non-Manufacturing Index", "source": "FRED", "region": "US"},
+    "inventory sales ratio": {"symbol": "ISRATIO", "name": "Business Inventory/Sales Ratio", "source": "FRED", "region": "US"},
+    
+    # ==================== FINANCIAL CONDITIONS ====================
+    "financial stress": {"symbol": "STLFSI4", "name": "St. Louis Financial Stress Index", "source": "FRED", "region": "US"},
+    "financial conditions": {"symbol": "NFCI", "name": "Chicago Fed Financial Conditions", "source": "FRED", "region": "US"},
+    "kansas stress": {"symbol": "KCFSI", "name": "Kansas City Financial Stress", "source": "FRED", "region": "US"},
+    "economic activity": {"symbol": "CFNAI", "name": "Chicago Fed National Activity", "source": "FRED", "region": "US"},
 }
 
 
@@ -396,11 +483,20 @@ class MacroFetcher:
     """Fetches macroeconomic data"""
     
     @staticmethod
+    def is_fred_symbol(query: str) -> bool:
+        """Check if query looks like a raw FRED symbol (uppercase, alphanumeric)"""
+        return query.isupper() and len(query) >= 2 and any(c.isalpha() for c in query)
+    
+    @staticmethod
     def resolve(query: str) -> Dict[str, str]:
         """Resolve query to macro data info"""
         q = query.lower().strip()
         if q in MACRO_MAP:
             return MACRO_MAP[q]
+        
+        # Try uppercase version (for FRED symbols)
+        if query.upper() in MACRO_MAP:
+            return MACRO_MAP[query.upper()]
         
         # Partial match
         for key, info in MACRO_MAP.items():
@@ -411,24 +507,32 @@ class MacroFetcher:
     
     @staticmethod
     def fetch_data(name: str) -> Dict[str, Any]:
-        """Fetch macro data"""
+        """Fetch macro data - supports friendly names and raw FRED symbols"""
         info = MacroFetcher.resolve(name)
         
-        if not info:
-            return {
-                "error": f"Unknown macro indicator: {name}. Try: m2, fed funds, us debt, vix, cpi, unemployment, gdp, eu cpi, japan gdp, china pmi"
-            }
+        if info:
+            # Found in MACRO_MAP
+            if info["source"] == "FRED":
+                result = fetch_fred_data(info["symbol"], info["name"])
+            else:
+                result = fetch_yahoo_macro(info["symbol"], info["name"])
+            
+            # Add region info
+            if not result.get("error"):
+                result["region"] = info.get("region", "US")
+            
+            return result
         
-        if info["source"] == "FRED":
-            result = fetch_fred_data(info["symbol"], info["name"])
-        else:
-            result = fetch_yahoo_macro(info["symbol"], info["name"])
+        # Not in MACRO_MAP - try direct FRED fetch if it looks like a FRED symbol
+        if MacroFetcher.is_fred_symbol(name):
+            result = fetch_fred_data(name, f"FRED: {name}")
+            if not result.get("error"):
+                result["region"] = "US"
+                return result
         
-        # Add region info
-        if not result.get("error"):
-            result["region"] = info.get("region", "US")
-        
-        return result
+        return {
+            "error": f"Unknown macro indicator: {name}. Try: m2, fed funds, us debt, vix, cpi, unemployment, gdp, eu cpi, japan gdp, china pmi"
+        }
     
     @staticmethod
     def list_indicators() -> List[Dict[str, str]]:

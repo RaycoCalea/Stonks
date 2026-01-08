@@ -1007,6 +1007,197 @@ function StockDataPanel({ data, formatNumber, formatPercent, formatPrice, getCha
           </a>
         </div>
       )}
+      
+      {/* Financial Statements Section */}
+      {(data.income_annual?.length > 0 || data.balance_annual?.length > 0 || data.cashflow_annual?.length > 0 ||
+        data.financials?.income_annual?.length > 0) && (
+        <div className="financials-section">
+          <h3 className="financials-title">FINANCIAL STATEMENTS</h3>
+          
+          {/* Income Statement Highlights */}
+          {(data.income_annual?.length > 0 || data.financials?.income_annual?.length > 0) && (
+            <div className="statement-section">
+              <h4 className="statement-title">INCOME STATEMENT (Annual)</h4>
+              <div className="statement-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Metric</th>
+                      {(data.income_annual || data.financials?.income_annual || []).slice(0, 4).map((period, i) => (
+                        <th key={i}>{period.date?.substring(0, 4) || `Y-${i+1}`}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Revenue</td>
+                      {(data.income_annual || data.financials?.income_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Total_Revenue)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Gross Profit</td>
+                      {(data.income_annual || data.financials?.income_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Gross_Profit)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Operating Income</td>
+                      {(data.income_annual || data.financials?.income_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Operating_Income)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Net Income</td>
+                      {(data.income_annual || data.financials?.income_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i} className={getChangeClass(period.Net_Income)}>
+                          {formatNumber(period.Net_Income)}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>EPS (Basic)</td>
+                      {(data.income_annual || data.financials?.income_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Basic_EPS, 2)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>EPS (Diluted)</td>
+                      {(data.income_annual || data.financials?.income_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Diluted_EPS, 2)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>EBITDA</td>
+                      {(data.income_annual || data.financials?.income_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.EBITDA)}</td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          {/* Balance Sheet Highlights */}
+          {(data.balance_annual?.length > 0 || data.financials?.balance_annual?.length > 0) && (
+            <div className="statement-section">
+              <h4 className="statement-title">BALANCE SHEET (Annual)</h4>
+              <div className="statement-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Metric</th>
+                      {(data.balance_annual || data.financials?.balance_annual || []).slice(0, 4).map((period, i) => (
+                        <th key={i}>{period.date?.substring(0, 4) || `Y-${i+1}`}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Total Assets</td>
+                      {(data.balance_annual || data.financials?.balance_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Total_Assets)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Total Liabilities</td>
+                      {(data.balance_annual || data.financials?.balance_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Total_Liabilities_Net_Minority_Interest)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Stockholders Equity</td>
+                      {(data.balance_annual || data.financials?.balance_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Stockholders_Equity)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Cash & Equivalents</td>
+                      {(data.balance_annual || data.financials?.balance_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Cash_And_Cash_Equivalents)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Total Debt</td>
+                      {(data.balance_annual || data.financials?.balance_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Total_Debt)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Working Capital</td>
+                      {(data.balance_annual || data.financials?.balance_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Working_Capital)}</td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          {/* Cash Flow Highlights */}
+          {(data.cashflow_annual?.length > 0 || data.financials?.cashflow_annual?.length > 0) && (
+            <div className="statement-section">
+              <h4 className="statement-title">CASH FLOW (Annual)</h4>
+              <div className="statement-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Metric</th>
+                      {(data.cashflow_annual || data.financials?.cashflow_annual || []).slice(0, 4).map((period, i) => (
+                        <th key={i}>{period.date?.substring(0, 4) || `Y-${i+1}`}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Operating Cash Flow</td>
+                      {(data.cashflow_annual || data.financials?.cashflow_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i} className={getChangeClass(period.Operating_Cash_Flow)}>
+                          {formatNumber(period.Operating_Cash_Flow)}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Investing Cash Flow</td>
+                      {(data.cashflow_annual || data.financials?.cashflow_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Investing_Cash_Flow)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Financing Cash Flow</td>
+                      {(data.cashflow_annual || data.financials?.cashflow_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Financing_Cash_Flow)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Free Cash Flow</td>
+                      {(data.cashflow_annual || data.financials?.cashflow_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i} className={getChangeClass(period.Free_Cash_Flow)}>
+                          {formatNumber(period.Free_Cash_Flow)}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Capital Expenditure</td>
+                      {(data.cashflow_annual || data.financials?.cashflow_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Capital_Expenditure)}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Depreciation</td>
+                      {(data.cashflow_annual || data.financials?.cashflow_annual || []).slice(0, 4).map((period, i) => (
+                        <td key={i}>{formatNumber(period.Depreciation_And_Amortization)}</td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

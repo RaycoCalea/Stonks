@@ -28,6 +28,8 @@ const ASSET_CLASSES = [
   { id: 'macro', label: 'MACRO' },
 ]
 
+const ASSETS_PER_PAGE = 30
+
 function MacroView({ selectedAssets, onUpdate }) {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(null)
@@ -37,6 +39,8 @@ function MacroView({ selectedAssets, onUpdate }) {
   const [selectedClass, setSelectedClass] = useState('all')
   const [showTrends, setShowTrends] = useState(true)
   const [heatmapTooltip, setHeatmapTooltip] = useState(null)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+  const [assetPage, setAssetPage] = useState(1)
 
   const runMacroAnalysis = useCallback(async () => {
     setLoading(true)
@@ -275,9 +279,32 @@ function MacroView({ selectedAssets, onUpdate }) {
             </div>
           </div>
 
-          {/* Individual Asset Details */}
+          {/* Individual Asset Details with Pagination */}
           <div className="assets-panel">
-            <h4 className="panel-title">INDIVIDUAL ASSET ANALYSIS ({macroData.assets?.length || 0} assets)</h4>
+            <div className="assets-header">
+              <h4 className="panel-title">INDIVIDUAL ASSET ANALYSIS ({macroData.assets?.length || 0} assets)</h4>
+              {macroData.assets?.length > ASSETS_PER_PAGE && (
+                <div className="pagination">
+                  <button 
+                    className="page-btn"
+                    disabled={assetPage === 1}
+                    onClick={() => setAssetPage(p => Math.max(1, p - 1))}
+                  >
+                    Prev
+                  </button>
+                  <span className="page-info">
+                    Page {assetPage} of {Math.ceil(macroData.assets.length / ASSETS_PER_PAGE)}
+                  </span>
+                  <button 
+                    className="page-btn"
+                    disabled={assetPage >= Math.ceil(macroData.assets.length / ASSETS_PER_PAGE)}
+                    onClick={() => setAssetPage(p => p + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="assets-table">
               <table>
                 <thead>
@@ -296,9 +323,11 @@ function MacroView({ selectedAssets, onUpdate }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {macroData.assets?.map((asset, i) => (
+                  {macroData.assets
+                    ?.slice((assetPage - 1) * ASSETS_PER_PAGE, assetPage * ASSETS_PER_PAGE)
+                    .map((asset, i) => (
                     <tr key={asset.ticker}>
-                      <td className="ticker" style={{ color: ASSET_COLORS[i % ASSET_COLORS.length] }}>
+                      <td className="ticker" style={{ color: ASSET_COLORS[(i + (assetPage - 1) * ASSETS_PER_PAGE) % ASSET_COLORS.length] }}>
                         {asset.ticker}
                       </td>
                       <td className="name">{asset.name || '-'}</td>
@@ -324,12 +353,105 @@ function MacroView({ selectedAssets, onUpdate }) {
             </div>
           </div>
 
+          {/* Cross-Class Analysis Summary */}
+          {macroData.cross_class_pairs_count > 0 && (
+            <div className="analysis-summary-panel">
+              <h4 className="panel-title">CROSS-CLASS ANALYSIS</h4>
+              <div className="analysis-stats">
+                <div className="stat-item">
+                  <span className="stat-value">{macroData.cross_class_pairs_count}</span>
+                  <span className="stat-label">Cross-Class Pairs</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-value">{macroData.leading_indicators?.length || 0}</span>
+                  <span className="stat-label">Leading Indicators</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-value">{macroData.crash_correlations?.length || 0}</span>
+                  <span className="stat-label">Crash Correlated</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-value">{macroData.regime_dependent?.length || 0}</span>
+                  <span className="stat-label">Regime Dependent</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Leading Indicators - Assets that predict others */}
+          {macroData.leading_indicators && macroData.leading_indicators.length > 0 && (
+            <div className="category-panel leading-panel">
+              <h4 className="panel-title">LEADING INDICATORS</h4>
+              <div className="correlation-note">
+                Assets where one appears to lead the other by days - potential predictive signals
+              </div>
+              <div className="category-grid">
+                {macroData.leading_indicators.slice(0, 8).map((pair, i) => (
+                  <div key={i} className="category-card leading">
+                    <div className="card-header">
+                      <span className="asset-ticker">{pair.leads === 'asset1' ? pair.asset1 : pair.asset2}</span>
+                      <span className="leads-arrow">--&gt;</span>
+                      <span className="asset-ticker">{pair.leads === 'asset1' ? pair.asset2 : pair.asset1}</span>
+                    </div>
+                    <div className="card-detail">
+                      <span className="detail-label">Lag:</span>
+                      <span className="detail-value">{Math.abs(pair.optimal_lag || 0)} days</span>
+                    </div>
+                    <div className="card-detail">
+                      <span className="detail-label">Lag Corr:</span>
+                      <span className={`detail-value ${pair.lag_corr >= 0 ? 'positive' : 'negative'}`}>
+                        {pair.lag_corr?.toFixed(3)}
+                      </span>
+                    </div>
+                    <div className="card-classes">
+                      <span className="class-badge">{pair.class1}</span>
+                      <span className="class-badge">{pair.class2}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Crash Correlations - Assets that crash together */}
+          {macroData.crash_correlations && macroData.crash_correlations.length > 0 && (
+            <div className="category-panel crash-panel">
+              <h4 className="panel-title">CRASH CORRELATIONS</h4>
+              <div className="correlation-note">
+                Assets that tend to crash together - important for risk management
+              </div>
+              <div className="category-grid">
+                {macroData.crash_correlations.slice(0, 8).map((pair, i) => (
+                  <div key={i} className="category-card crash">
+                    <div className="card-header">
+                      <span className="asset-ticker">{pair.asset1}</span>
+                      <span className="crash-icon">X</span>
+                      <span className="asset-ticker">{pair.asset2}</span>
+                    </div>
+                    <div className="card-detail">
+                      <span className="detail-label">Left Tail:</span>
+                      <span className="detail-value negative">{(pair.left_tail * 100)?.toFixed(1)}%</span>
+                    </div>
+                    <div className="card-detail">
+                      <span className="detail-label">Right Tail:</span>
+                      <span className="detail-value positive">{(pair.right_tail * 100)?.toFixed(1)}%</span>
+                    </div>
+                    <div className="card-classes">
+                      <span className="class-badge">{pair.class1}</span>
+                      <span className="class-badge">{pair.class2}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Surprising Correlations - Cross-Asset Class Relationships */}
           {macroData.surprising_correlations && macroData.surprising_correlations.length > 0 && (
             <div className="surprising-panel">
-              <h4 className="panel-title">SURPRISING CORRELATIONS (Cross-Asset Class)</h4>
+              <h4 className="panel-title">HIGHEST SURPRISE SCORE (Cross-Class)</h4>
               <div className="correlation-note">
-                High correlations between assets from different classes - potential hidden relationships
+                Strongest unexpected correlations between different asset classes
               </div>
               <div className="surprising-grid">
                 {macroData.surprising_correlations.slice(0, 12).map((pair, i) => (
@@ -350,11 +472,19 @@ function MacroView({ selectedAssets, onUpdate }) {
                       </span>
                     </div>
                     <div className="surprising-value">
-                      <span className="corr-type">Spearman:</span>
-                      <span className={`corr-value ${pair.spearman >= 0 ? 'positive' : 'negative'}`}>
-                        {pair.spearman?.toFixed(3)}
+                      <span className="corr-type">Type:</span>
+                      <span className="corr-value relationship-type">
+                        {pair.relationship_type?.replace(/_/g, ' ') || 'LINEAR'}
                       </span>
                     </div>
+                    {pair.optimal_lag !== 0 && (
+                      <div className="surprising-value">
+                        <span className="corr-type">Lead:</span>
+                        <span className="corr-value">
+                          {pair.leads === 'asset1' ? pair.asset1 : pair.asset2} by {Math.abs(pair.optimal_lag)}d
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -365,26 +495,6 @@ function MacroView({ selectedAssets, onUpdate }) {
           {macroData.heatmap && macroData.heatmap.cells && (
             <div className="heatmap-panel">
               <h4 className="panel-title">CORRELATION HEATMAP ({macroData.heatmap.size}x{macroData.heatmap.size})</h4>
-              
-              {/* Heatmap Tooltip Display */}
-              <div className="heatmap-tooltip-display">
-                {heatmapTooltip ? (
-                  <>
-                    <span className="tooltip-asset">{heatmapTooltip.ticker1}</span>
-                    <span className="tooltip-vs">vs</span>
-                    <span className="tooltip-asset">{heatmapTooltip.ticker2}</span>
-                    <span className="tooltip-separator">|</span>
-                    <span className={`tooltip-value ${heatmapTooltip.value >= 0 ? 'positive' : 'negative'}`}>
-                      {heatmapTooltip.value >= 0 ? '+' : ''}{heatmapTooltip.value.toFixed(3)}
-                    </span>
-                    <span className="tooltip-classes">
-                      ({heatmapTooltip.class1} / {heatmapTooltip.class2})
-                    </span>
-                  </>
-                ) : (
-                  <span className="tooltip-prompt">Hover over a cell to see correlation details</span>
-                )}
-              </div>
               
               <div className="heatmap-container">
                 <div 
@@ -406,7 +516,13 @@ function MacroView({ selectedAssets, onUpdate }) {
                         backgroundColor: getHeatmapColor(cell.value),
                         aspectRatio: '1'
                       }}
-                      onMouseEnter={() => setHeatmapTooltip(cell)}
+                      onMouseEnter={(e) => {
+                        setHeatmapTooltip(cell)
+                        setTooltipPosition({ x: e.clientX, y: e.clientY })
+                      }}
+                      onMouseMove={(e) => {
+                        setTooltipPosition({ x: e.clientX, y: e.clientY })
+                      }}
                     />
                   ))}
                 </div>
@@ -416,6 +532,80 @@ function MacroView({ selectedAssets, onUpdate }) {
                   <span className="legend-label">+1.0 (Correlated)</span>
                 </div>
               </div>
+              
+              {/* Floating Tooltip Popup */}
+              {heatmapTooltip && (
+                <div 
+                  className="heatmap-floating-tooltip"
+                  style={{
+                    position: 'fixed',
+                    left: tooltipPosition.x + 15,
+                    top: tooltipPosition.y + 15,
+                    zIndex: 9999,
+                    pointerEvents: 'none'
+                  }}
+                >
+                  <div className="floating-header">
+                    <div className="floating-asset">
+                      <span className="floating-ticker">{heatmapTooltip.ticker1}</span>
+                      {heatmapTooltip.name1 && <span className="floating-name">{heatmapTooltip.name1}</span>}
+                      <span className="floating-class">{heatmapTooltip.class1}</span>
+                    </div>
+                    <span className="floating-vs">vs</span>
+                    <div className="floating-asset">
+                      <span className="floating-ticker">{heatmapTooltip.ticker2}</span>
+                      {heatmapTooltip.name2 && <span className="floating-name">{heatmapTooltip.name2}</span>}
+                      <span className="floating-class">{heatmapTooltip.class2}</span>
+                    </div>
+                  </div>
+                  <div className="floating-divider" />
+                  <div className="floating-correlation">
+                    <span className="floating-label">PEARSON CORRELATION</span>
+                    <span className={`floating-value ${heatmapTooltip.value >= 0 ? 'positive' : 'negative'}`}>
+                      {heatmapTooltip.value >= 0 ? '+' : ''}{heatmapTooltip.value.toFixed(4)}
+                    </span>
+                  </div>
+                  <div className="floating-stats">
+                    <div className="floating-stat">
+                      <span className="stat-label">Strength</span>
+                      <span className={`stat-value ${
+                        Math.abs(heatmapTooltip.value) > 0.7 ? 'strong' : 
+                        Math.abs(heatmapTooltip.value) > 0.4 ? 'moderate' : 'weak'
+                      }`}>
+                        {Math.abs(heatmapTooltip.value) > 0.7 ? 'STRONG' : 
+                         Math.abs(heatmapTooltip.value) > 0.4 ? 'MODERATE' : 
+                         Math.abs(heatmapTooltip.value) > 0.2 ? 'WEAK' : 'NEGLIGIBLE'}
+                      </span>
+                    </div>
+                    <div className="floating-stat">
+                      <span className="stat-label">Direction</span>
+                      <span className={`stat-value ${heatmapTooltip.value >= 0 ? 'positive' : 'negative'}`}>
+                        {heatmapTooltip.value >= 0 ? 'POSITIVE' : 'INVERSE'}
+                      </span>
+                    </div>
+                    <div className="floating-stat">
+                      <span className="stat-label">Cross-Class</span>
+                      <span className={`stat-value ${heatmapTooltip.class1 !== heatmapTooltip.class2 ? 'highlight' : ''}`}>
+                        {heatmapTooltip.class1 !== heatmapTooltip.class2 ? 'YES' : 'SAME CLASS'}
+                      </span>
+                    </div>
+                  </div>
+                  {heatmapTooltip.spearman && (
+                    <div className="floating-extra">
+                      <div className="extra-row">
+                        <span>Spearman:</span>
+                        <span>{heatmapTooltip.spearman?.toFixed(3)}</span>
+                      </div>
+                      {heatmapTooltip.mutual_info && (
+                        <div className="extra-row">
+                          <span>Mutual Info:</span>
+                          <span>{heatmapTooltip.mutual_info?.toFixed(3)}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

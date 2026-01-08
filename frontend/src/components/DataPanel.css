@@ -324,3 +324,101 @@
     font-size: 0.7rem;
   }
 }
+
+/* ============================================
+   FINANCIAL STATEMENTS SECTION
+   ============================================ */
+
+.financials-section {
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--bg-primary);
+  border-top: 2px solid var(--accent-primary);
+}
+
+.financials-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  letter-spacing: 0.15em;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.statement-section {
+  margin-bottom: var(--space-xl);
+}
+
+.statement-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-md);
+}
+
+.statement-table {
+  overflow-x: auto;
+}
+
+.statement-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+}
+
+.statement-table th {
+  text-align: right;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.statement-table th:first-child {
+  text-align: left;
+  color: var(--text-secondary);
+}
+
+.statement-table td {
+  text-align: right;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+}
+
+.statement-table td:first-child {
+  text-align: left;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.statement-table tr:hover td {
+  background: rgba(0, 255, 136, 0.02);
+}
+
+.statement-table .text-positive {
+  color: var(--positive);
+}
+
+.statement-table .text-negative {
+  color: var(--negative);
+}
+
+/* Responsive Financial Tables */
+@media (max-width: 768px) {
+  .financials-section {
+    padding: var(--space-md);
+  }
+  
+  .statement-table th,
+  .statement-table td {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.6rem;
+  }
+}

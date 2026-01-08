@@ -31,6 +31,8 @@ COMMODITY_MAP = {
     # Livestock
     "cattle": "LE=F", "live cattle": "LE=F",
     "feeder cattle": "GF=F", "hogs": "HE=F", "lean hogs": "HE=F",
+    # Specialty/Other
+    "uranium": "URA",  # Uranium ETF as proxy
 }
 
 # Commodity metadata for display

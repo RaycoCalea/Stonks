@@ -30,68 +30,331 @@ from .indices import IndexFetcher
 from .treasury import TreasuryFetcher
 from .macro import MacroFetcher
 
-# Rate limiting protection
-REQUEST_DELAY = 1.0  # Delay between requests in seconds (increased)
-MAX_RETRIES = 2  # Reduced retries to save time
-BATCH_SIZE = 5  # Process assets in batches
-BATCH_DELAY = 3  # Delay between batches in seconds
+# Rate limiting protection - optimized for more assets
+REQUEST_DELAY = 0.8  # Faster for Yahoo Finance (handles volume well)
+MAX_RETRIES = 2
+BATCH_SIZE = 10  # Larger batches
+BATCH_DELAY = 2  # Shorter delay
 
-# Default assets to analyze - EXPANDED GLOBAL COVERAGE
+# =====================================================================
+# MASSIVELY EXPANDED GLOBAL ASSET UNIVERSE (200+ assets)
+# =====================================================================
+
 DEFAULT_ASSETS = {
-    # US STOCKS - Major sectors
+    # ---------------------------------------------------------------------
+    # GLOBAL STOCKS - 50+ stocks across sectors and regions
+    # ---------------------------------------------------------------------
     'stocks': [
-        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA',  # Tech
-        'JPM', 'BAC', 'GS', 'V', 'MA',  # Financials
-        'JNJ', 'PFE', 'UNH',  # Healthcare
-        'XOM', 'CVX',  # Energy
-        'WMT', 'COST', 'HD',  # Consumer
+        # === US TECH ===
+        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA', 'AVGO', 'ORCL', 'CRM',
+        # === US FINANCIALS ===
+        'JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'BLK', 'AXP', 'V', 'MA',
+        # === US HEALTHCARE ===
+        'JNJ', 'UNH', 'PFE', 'MRK', 'ABBV', 'LLY', 'TMO',
+        # === US ENERGY ===
+        'XOM', 'CVX', 'COP', 'SLB', 'OXY',
+        # === US INDUSTRIALS ===
+        'CAT', 'BA', 'HON', 'UPS', 'GE', 'MMM', 'RTX',
+        # === US CONSUMER ===
+        'WMT', 'COST', 'HD', 'MCD', 'NKE', 'SBUX', 'PG', 'KO', 'PEP',
+        # === US REAL ESTATE ===
+        'AMT', 'PLD', 'SPG',
+        # === US UTILITIES ===
+        'NEE', 'DUK', 'SO',
+        # === EUROPE ===
+        'SAP',   # Germany - Tech
+        'ASML',  # Netherlands - Semiconductors
+        'HSBC',  # UK - Banking
+        'BP',    # UK - Energy
+        'SHEL',  # UK - Energy (Shell)
+        'NVS',   # Switzerland - Healthcare
+        'UL',    # UK - Consumer
+        'TTE',   # France - Energy (TotalEnergies)
+        'SNY',   # France - Healthcare (Sanofi)
+        # === JAPAN ===
+        'TM',    # Toyota
+        'SONY',  # Electronics
+        'HMC',   # Honda
+        # === CHINA/ASIA ===
+        'BABA',  # Alibaba
+        'JD',    # JD.com
+        'NIO',   # EV
+        'BIDU',  # Baidu
+        'TSM',   # Taiwan Semiconductors
+        'INFY',  # India IT
+        'WIT',   # India IT (Wipro)
+        # === LATIN AMERICA ===
+        'VALE',  # Brazil Mining
+        'PBR',   # Brazil Oil (Petrobras)
+        'ITUB',  # Brazil Banking
+        # === CANADA ===
+        'TD',    # Toronto-Dominion
+        'RY',    # Royal Bank
+        'ENB',   # Energy (Enbridge)
+        # === AUSTRALIA ===
+        'BHP',   # Mining
+        'RIO',   # Mining
     ],
-    # CRYPTO
-    'crypto': ['bitcoin', 'ethereum'],  # Limited due to API constraints
-    # COMMODITIES
-    'commodities': ['gold', 'silver', 'oil', 'natural gas', 'copper', 'wheat', 'corn'],
-    # FOREX - Major pairs
-    'forex': ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCHF', 'USDCAD', 'USDCNY'],
-    # TREASURY YIELDS
-    'treasury': ['^TNX', '^TYX', '^FVX', '^IRX'],
-    # GLOBAL INDICES
+    
+    # ---------------------------------------------------------------------
+    # CRYPTO - Top 20 by market cap (will rate-limit carefully)
+    # ---------------------------------------------------------------------
+    'crypto': [
+        'bitcoin', 'ethereum', 'binancecoin', 'ripple', 'solana',
+        'cardano', 'dogecoin', 'polkadot', 'avalanche-2', 'chainlink',
+        'polygon', 'litecoin', 'uniswap', 'stellar', 'monero',
+    ],
+    
+    # ---------------------------------------------------------------------
+    # COMMODITIES - All major categories
+    # ---------------------------------------------------------------------
+    'commodities': [
+        # Precious Metals
+        'gold', 'silver', 'platinum', 'palladium',
+        # Energy
+        'oil', 'brent', 'natural gas', 'heating oil', 'gasoline',
+        # Industrial Metals
+        'copper', 'aluminum',
+        # Agricultural - Grains
+        'wheat', 'corn', 'soybeans', 'oats', 'rice',
+        # Agricultural - Softs
+        'coffee', 'sugar', 'cotton', 'cocoa', 'lumber',
+        # Livestock
+        'cattle', 'hogs',
+    ],
+    
+    # ---------------------------------------------------------------------
+    # FOREX - 20 major and emerging currency pairs
+    # ---------------------------------------------------------------------
+    'forex': [
+        # G10 Majors
+        'EURUSD', 'GBPUSD', 'USDJPY', 'USDCHF', 'AUDUSD', 'USDCAD', 'NZDUSD',
+        # Crosses
+        'EURGBP', 'EURJPY', 'GBPJPY',
+        # Emerging Markets
+        'USDCNY', 'USDINR', 'USDBRL', 'USDMXN', 'USDRUB', 'USDTRY',
+        'USDZAR', 'USDKRW', 'USDSGD', 'USDTHB',
+    ],
+    
+    # ---------------------------------------------------------------------
+    # TREASURY & BONDS - Full yield curve + credit
+    # ---------------------------------------------------------------------
+    'treasury': [
+        '^IRX',   # 13-week T-Bill
+        '^FVX',   # 5-Year
+        '^TNX',   # 10-Year
+        '^TYX',   # 30-Year
+    ],
+    
+    # ---------------------------------------------------------------------
+    # ETFS - Sector, Thematic, and International exposure
+    # ---------------------------------------------------------------------
+    'etfs': [
+        # === US SECTOR ETFs ===
+        'XLK',    # Technology
+        'XLF',    # Financials
+        'XLV',    # Healthcare
+        'XLE',    # Energy
+        'XLI',    # Industrials
+        'XLP',    # Consumer Staples
+        'XLY',    # Consumer Discretionary
+        'XLU',    # Utilities
+        'XLB',    # Materials
+        'XLRE',   # Real Estate
+        # === THEMATIC ETFs ===
+        'ARKK',   # Innovation/Disruptive
+        'ICLN',   # Clean Energy
+        'LIT',    # Lithium & Battery
+        'TAN',    # Solar
+        'REMX',   # Rare Earth & Strategic Metals
+        'ROBO',   # Robotics & AI
+        'HACK',   # Cybersecurity
+        'IBB',    # Biotech
+        'XBI',    # Biotech (equal weight)
+        # === INTERNATIONAL ETFs ===
+        'EEM',    # Emerging Markets
+        'EFA',    # Developed Markets ex-US
+        'VEU',    # All World ex-US
+        'VWO',    # Emerging Markets
+        'FXI',    # China Large-Cap
+        'EWJ',    # Japan
+        'EWG',    # Germany
+        'EWU',    # UK
+        'EWZ',    # Brazil
+        'EWY',    # South Korea
+        'INDA',   # India
+        'EWT',    # Taiwan
+        # === BONDS & FIXED INCOME ETFs ===
+        'TLT',    # 20+ Year Treasury
+        'IEF',    # 7-10 Year Treasury
+        'SHY',    # 1-3 Year Treasury
+        'HYG',    # High Yield Corporate
+        'LQD',    # Investment Grade Corporate
+        'EMB',    # Emerging Market Bonds
+        # === COMMODITY ETFs ===
+        'GLD',    # Gold
+        'SLV',    # Silver
+        'USO',    # Oil
+        'UNG',    # Natural Gas
+        'DBA',    # Agriculture
+        # === VOLATILITY & ALTERNATIVES ===
+        'UVXY',   # Volatility
+        'SVXY',   # Short Volatility
+    ],
+    
+    # ---------------------------------------------------------------------
+    # GLOBAL INDICES - 25+ indices worldwide
+    # ---------------------------------------------------------------------
     'indices': [
-        # US
-        '^GSPC', '^DJI', '^IXIC', '^RUT', '^VIX',
-        # Europe
-        '^GDAXI', '^FTSE', '^FCHI', '^STOXX50E',
-        # Asia
-        '^N225', '^HSI', '000001.SS',
-        # Other
-        '^BVSP', '^GSPTSE',
+        # === USA ===
+        '^GSPC',      # S&P 500
+        '^DJI',       # Dow Jones
+        '^IXIC',      # NASDAQ
+        '^RUT',       # Russell 2000
+        '^VIX',       # Volatility Index
+        '^SOX',       # Semiconductor Index
+        # === EUROPE ===
+        '^GDAXI',     # DAX (Germany)
+        '^FTSE',      # FTSE 100 (UK)
+        '^FCHI',      # CAC 40 (France)
+        '^STOXX50E',  # Euro Stoxx 50
+        '^IBEX',      # Spain
+        '^AEX',       # Netherlands
+        '^SSMI',      # Switzerland
+        # === ASIA PACIFIC ===
+        '^N225',      # Nikkei 225 (Japan)
+        '^HSI',       # Hang Seng (Hong Kong)
+        '000001.SS',  # Shanghai Composite
+        '^NSEI',      # Nifty 50 (India)
+        '^KS11',      # KOSPI (South Korea)
+        '^TWII',      # Taiwan Weighted
+        '^STI',       # Singapore Straits
+        '^AXJO',      # ASX 200 (Australia)
+        # === AMERICAS ===
+        '^BVSP',      # Bovespa (Brazil)
+        '^MXX',       # IPC (Mexico)
+        '^GSPTSE',    # TSX (Canada)
+        '^MERV',      # MERVAL (Argentina)
     ],
-    # MACRO INDICATORS - COMPREHENSIVE
+    
+    # ---------------------------------------------------------------------
+    # MACRO INDICATORS - GLOBAL SOCIO-ECONOMIC DATA
+    # Using friendly names that map to FRED + direct FRED symbols
+    # ---------------------------------------------------------------------
     'macro': [
-        # Money & Credit
-        'M2', 'M1', 'FEDFUNDS', 'DFF',
-        # Inflation
-        'CPIAUCSL', 'PCEPI', 'CPILFESL',
-        # Employment
-        'UNRATE', 'PAYEMS', 'ICSA', 'CIVPART',
-        # GDP & Output
-        'GDP', 'GDPC1', 'INDPRO',
-        # Consumer
-        'UMCSENT', 'RSAFS', 'PCE',
-        # Housing
-        'HOUST', 'PERMIT', 'CSUSHPISA',
-        # Debt & Credit
-        'GFDEBTN', 'TCMDO', 'BUSLOANS',
-        # Manufacturing
-        'DGORDER', 'NEWORDER',
-        # Trade
-        'BOPGSTB', 'NETEXP',
-        # Volatility & Risk
-        'VIXCLS', 'TEDRATE', 'T10Y2Y', 'T10Y3M',
-        # Interest Rates
-        'GS10', 'GS2', 'GS5', 'GS30',
-        # International
-        'DEXUSEU', 'DEXJPUS', 'DEXCHUS',
-    ]
+        # === US ECONOMY - CORE ===
+        'm1', 'm2', 'fed funds', 'prime rate',
+        'us debt', 'debt to gdp',
+        'cpi', 'pce', 'inflation',
+        'unemployment', 'nonfarm payrolls', 'initial claims',
+        'gdp', 'real gdp', 'gdp growth',
+        'industrial production', 'capacity utilization',
+        'consumer confidence', 'retail sales',
+        'housing starts', 'home prices', 'mortgage rate',
+        'vix', 'skew', 'dollar index',
+        'yield curve', 'ted spread', 'high yield spread',
+        'fed balance sheet', 'reverse repo',
+        'us population',
+        
+        # === US ECONOMY - DEEP DIVE ===
+        'monetary velocity', 'monetary base',
+        'job openings', 'quit rate', 'hire rate', 'layoffs',
+        'labor participation', 'employment ratio', 'u6 unemployment',
+        'avg hourly earnings', 'weekly hours',
+        'durable goods', 'factory orders', 'ism manufacturing', 'ism services',
+        'inventory sales ratio',
+        'financial stress', 'financial conditions', 'economic activity',
+        
+        # === CREDIT & LENDING ===
+        'credit card delinquency', 'mortgage delinquency', 'commercial delinquency',
+        'consumer credit', 'auto loans', 'student loans',
+        'bank lending', 'commercial loans', 'bank reserves',
+        
+        # === REAL ESTATE DEPTH ===
+        'rental vacancy', 'homeownership rate', 'construction spending',
+        
+        # === GOVERNMENT ===
+        'federal deficit', 'federal spending', 'federal receipts',
+        
+        # === TRADE ===
+        'trade balance', 'imports', 'exports',
+        
+        # === WEATHER & CLIMATE (macro-economic impact) ===
+        'heating degree days', 'cooling degree days',
+        'drought index',
+        
+        # === ENERGY ===
+        'natural gas storage', 'crude oil stocks', 'gasoline price',
+        
+        # === AGRICULTURE & FOOD ===
+        'wheat price', 'corn price', 'soybeans price',
+        'food price index', 'fertilizer price',
+        
+        # === EUROPE ===
+        'ecb rate', 'eu inflation', 'eu unemployment', 'eu gdp', 'eu m3', 'euribor',
+        'german gdp', 'german cpi', 'german unemployment', 'german bund', 'german ifo',
+        'uk gdp', 'uk cpi', 'uk unemployment', 'boe rate', 'uk gilt',
+        'france gdp', 'france cpi', 'france unemployment',
+        'italy gdp', 'italy cpi', 'btp',
+        'spain gdp', 'spain unemployment',
+        
+        # === ASIA ===
+        'japan gdp', 'japan cpi', 'japan unemployment', 'boj rate', 'jgb', 'japan industrial',
+        'china gdp', 'china cpi', 'china pmi', 'china m2', 'pboc rate', 'china industrial',
+        'korea gdp', 'korea cpi', 'korea unemployment',
+        'india gdp', 'india cpi', 'rbi rate',
+        'australia gdp', 'australia cpi', 'australia unemployment', 'rba rate',
+        
+        # === EMERGING MARKETS ===
+        'brazil gdp', 'brazil cpi', 'selic',
+        'mexico gdp', 'mexico cpi', 'banxico rate',
+        'russia gdp', 'russia cpi', 'cbr rate',
+        'sa gdp', 'sa cpi', 'sarb rate',
+        'turkey gdp', 'turkey cpi', 'tcmb rate',
+        
+        # === CURRENCIES ===
+        'euro', 'yen', 'yuan', 'pound', 'swiss franc',
+        'canadian dollar', 'aussie',
+        
+        # === GLOBAL ===
+        'world gdp', 'global pmi', 'oil price', 'gold price', 'copper price',
+        'baltic dry',  # Shipping/trade indicator
+    ],
+    
+    # ---------------------------------------------------------------------
+    # COUNTRY-LEVEL DATA (for global map visualization)
+    # Each entry represents a country's key metrics
+    # ---------------------------------------------------------------------
+    'country_stocks': [
+        # Americas
+        's&p 500',          # USA
+        'tsx',              # Canada
+        'bovespa',          # Brazil
+        # Europe
+        'dax',              # Germany
+        'ftse',             # UK
+        'cac',              # France
+        'euro stoxx',       # Eurozone
+        'smi',              # Switzerland
+        # Asia
+        'nikkei',           # Japan
+        'shanghai',         # China
+        'hang seng',        # Hong Kong
+        'kospi',            # South Korea
+        'nifty',            # India
+        'asx',              # Australia
+    ],
+    
+    'country_currencies': [
+        # Major currencies vs USD
+        'euro',             # EUR/USD
+        'pound',            # GBP/USD  
+        'yen',              # USD/JPY
+        'yuan',             # USD/CNY
+        'swiss franc',      # USD/CHF
+        'canadian dollar',  # USD/CAD
+        'aussie',           # AUD/USD
+    ],
 }
 
 
@@ -201,6 +464,9 @@ def fetch_asset_data(asset_type: str, ticker: str, period: str) -> Optional[Dict
             
             if asset_type == 'stocks':
                 data = StockFetcher.fetch_history(ticker, period)
+            elif asset_type == 'etfs':
+                # ETFs use same fetcher as stocks
+                data = StockFetcher.fetch_history(ticker, period)
             elif asset_type == 'crypto':
                 # CoinGecko free API limited to 365 days
                 days = get_period_days_for_crypto(period)
@@ -214,6 +480,12 @@ def fetch_asset_data(asset_type: str, ticker: str, period: str) -> Optional[Dict
             elif asset_type == 'treasury':
                 data = TreasuryFetcher.fetch_history(ticker, period)
             elif asset_type == 'macro':
+                data = MacroFetcher.fetch_data(ticker)
+            elif asset_type == 'country_stocks':
+                # Country stock indices - use macro fetcher which handles Yahoo
+                data = MacroFetcher.fetch_data(ticker)
+            elif asset_type == 'country_currencies':
+                # Country currencies - use macro fetcher which handles FRED FX data
                 data = MacroFetcher.fetch_data(ticker)
             else:
                 return None
@@ -417,28 +689,186 @@ def align_returns_by_date(analyzed_assets: List[Dict]) -> Dict[str, List[float]]
     return aligned
 
 
-def calculate_correlations(analyzed_assets: List[Dict], top_n: int = 20) -> Dict[str, Any]:
-    """Calculate multiple correlation types and find interesting relationships"""
+def calculate_lead_lag_correlation(r1: List[float], r2: List[float], max_lag: int = 10) -> Dict[str, Any]:
+    """
+    Calculate lead-lag relationship between two return series.
+    Returns the optimal lag and correlation at that lag.
+    """
+    if len(r1) < 30 or len(r2) < 30:
+        return {'optimal_lag': 0, 'lag_corr': 0.0, 'leads': None}
+    
+    try:
+        r1_arr = np.array(r1)
+        r2_arr = np.array(r2)
+        
+        best_lag = 0
+        best_corr = 0.0
+        
+        # Check positive lags (r1 leads r2)
+        for lag in range(1, min(max_lag + 1, len(r1) // 3)):
+            corr = np.corrcoef(r1_arr[:-lag], r2_arr[lag:])[0, 1]
+            if not np.isnan(corr) and abs(corr) > abs(best_corr):
+                best_corr = float(corr)
+                best_lag = lag  # Positive = r1 leads
+        
+        # Check negative lags (r2 leads r1)
+        for lag in range(1, min(max_lag + 1, len(r1) // 3)):
+            corr = np.corrcoef(r1_arr[lag:], r2_arr[:-lag])[0, 1]
+            if not np.isnan(corr) and abs(corr) > abs(best_corr):
+                best_corr = float(corr)
+                best_lag = -lag  # Negative = r2 leads
+        
+        return {
+            'optimal_lag': best_lag,
+            'lag_corr': best_corr,
+            'leads': 'asset1' if best_lag > 0 else ('asset2' if best_lag < 0 else None)
+        }
+    except:
+        return {'optimal_lag': 0, 'lag_corr': 0.0, 'leads': None}
+
+
+def calculate_tail_dependence(r1: List[float], r2: List[float], quantile: float = 0.1) -> Dict[str, float]:
+    """
+    Calculate tail dependence - do assets crash/spike together?
+    Lower quantile = left tail (crashes), upper quantile = right tail (spikes)
+    """
+    if len(r1) < 50 or len(r2) < 50:
+        return {'left_tail': 0.0, 'right_tail': 0.0, 'tail_asymmetry': 0.0}
+    
+    try:
+        r1_arr = np.array(r1)
+        r2_arr = np.array(r2)
+        
+        # Left tail (crashes) - both assets in bottom quantile
+        q1_low = np.percentile(r1_arr, quantile * 100)
+        q2_low = np.percentile(r2_arr, quantile * 100)
+        
+        r1_in_low = r1_arr <= q1_low
+        r2_in_low = r2_arr <= q2_low
+        
+        left_tail = np.mean(r2_in_low[r1_in_low]) if np.sum(r1_in_low) > 0 else 0.0
+        
+        # Right tail (spikes) - both assets in top quantile
+        q1_high = np.percentile(r1_arr, (1 - quantile) * 100)
+        q2_high = np.percentile(r2_arr, (1 - quantile) * 100)
+        
+        r1_in_high = r1_arr >= q1_high
+        r2_in_high = r2_arr >= q2_high
+        
+        right_tail = np.mean(r2_in_high[r1_in_high]) if np.sum(r1_in_high) > 0 else 0.0
+        
+        # Asymmetry: positive = crash together more, negative = spike together more
+        tail_asymmetry = left_tail - right_tail
+        
+        return {
+            'left_tail': float(left_tail),
+            'right_tail': float(right_tail),
+            'tail_asymmetry': float(tail_asymmetry)
+        }
+    except:
+        return {'left_tail': 0.0, 'right_tail': 0.0, 'tail_asymmetry': 0.0}
+
+
+def calculate_rolling_correlation_stability(r1: List[float], r2: List[float], window: int = 60) -> Dict[str, float]:
+    """
+    Calculate how stable the correlation is over time.
+    High stability = consistent relationship, low = regime-dependent
+    """
+    if len(r1) < window * 2:
+        return {'stability': 0.0, 'mean_corr': 0.0, 'std_corr': 0.0, 'regime_changes': 0}
+    
+    try:
+        r1_arr = np.array(r1)
+        r2_arr = np.array(r2)
+        
+        rolling_corrs = []
+        for i in range(len(r1) - window):
+            corr = np.corrcoef(r1_arr[i:i+window], r2_arr[i:i+window])[0, 1]
+            if not np.isnan(corr):
+                rolling_corrs.append(corr)
+        
+        if len(rolling_corrs) < 5:
+            return {'stability': 0.0, 'mean_corr': 0.0, 'std_corr': 0.0, 'regime_changes': 0}
+        
+        mean_corr = np.mean(rolling_corrs)
+        std_corr = np.std(rolling_corrs)
+        
+        # Stability = 1 - normalized std (high std = low stability)
+        stability = max(0, 1 - std_corr)
+        
+        # Count regime changes (sign flips)
+        signs = np.sign(rolling_corrs)
+        regime_changes = np.sum(np.abs(np.diff(signs)) > 0)
+        
+        return {
+            'stability': float(stability),
+            'mean_corr': float(mean_corr),
+            'std_corr': float(std_corr),
+            'regime_changes': int(regime_changes)
+        }
+    except:
+        return {'stability': 0.0, 'mean_corr': 0.0, 'std_corr': 0.0, 'regime_changes': 0}
+
+
+def categorize_relationship(corr_data: Dict) -> str:
+    """Categorize the type of relationship between two assets"""
+    pearson = abs(corr_data.get('pearson', 0))
+    spearman = abs(corr_data.get('spearman', 0))
+    stability = corr_data.get('stability', 0.5)
+    left_tail = corr_data.get('left_tail', 0)
+    lag = corr_data.get('optimal_lag', 0)
+    
+    # Determine relationship type
+    if pearson < 0.15 and spearman < 0.15:
+        return 'INDEPENDENT'
+    
+    if abs(lag) >= 3 and abs(corr_data.get('lag_corr', 0)) > 0.3:
+        return 'LEADING_INDICATOR'
+    
+    if left_tail > 0.4:
+        return 'CRASH_CORRELATED'
+    
+    if stability < 0.4:
+        return 'REGIME_DEPENDENT'
+    
+    if spearman > pearson * 1.3:
+        return 'NON_LINEAR'
+    
+    if pearson > 0.6:
+        return 'STRONG_LINEAR'
+    
+    if pearson > 0.3:
+        return 'MODERATE_LINEAR'
+    
+    return 'WEAK_LINEAR'
+
+
+def calculate_correlations(analyzed_assets: List[Dict], top_n: int = 30) -> Dict[str, Any]:
+    """
+    Calculate CROSS-CLASS correlations with advanced analysis.
+    SKIPS same-class correlations to focus on surprising relationships.
+    """
+    empty_result = {
+        'pearson_matrix': None, 'spearman_matrix': None, 'tickers': [], 
+        'asset_classes': {}, 'top_positive': [], 'top_negative': [], 
+        'surprising': [], 'all_pairs': [], 'cross_class_only': [],
+        'leading_indicators': [], 'crash_correlations': [], 'regime_dependent': []
+    }
+    
     if len(analyzed_assets) < 2:
-        return {'pearson_matrix': None, 'spearman_matrix': None, 'tickers': [], 
-                'asset_classes': {}, 'top_positive': [], 'top_negative': [], 
-                'surprising': [], 'all_pairs': []}
+        return empty_result
     
     # Filter assets with valid returns
     valid_assets = [a for a in analyzed_assets if a.get('returns') and len(a['returns']) >= 20]
     
     if len(valid_assets) < 2:
-        return {'pearson_matrix': None, 'spearman_matrix': None, 'tickers': [], 
-                'asset_classes': {}, 'top_positive': [], 'top_negative': [], 
-                'surprising': [], 'all_pairs': []}
+        return empty_result
     
-    # Align returns using date-based alignment
+    # Align returns
     returns_data = align_returns_by_date(valid_assets)
     
     if len(returns_data) < 2:
-        return {'pearson_matrix': None, 'spearman_matrix': None, 'tickers': [], 
-                'asset_classes': {}, 'top_positive': [], 'top_negative': [], 
-                'surprising': [], 'all_pairs': []}
+        return empty_result
     
     # Build ticker list and asset class map
     tickers = list(returns_data.keys())
@@ -446,67 +876,113 @@ def calculate_correlations(analyzed_assets: List[Dict], top_n: int = 20) -> Dict
     
     n = len(tickers)
     
-    # Calculate correlation matrices
+    # Calculate matrices (for heatmap)
     pearson_matrix = np.zeros((n, n))
     spearman_matrix = np.zeros((n, n))
     
-    print(f"[MACRO CORR] Calculating correlations for {n} assets...")
+    print(f"[MACRO CORR] Computing CROSS-CLASS correlations for {n} assets...")
     
-    correlations = []
+    all_pairs = []
+    cross_class_pairs = []
+    
+    pairs_computed = 0
     
     for i in range(n):
         pearson_matrix[i, i] = 1.0
         spearman_matrix[i, i] = 1.0
         
         for j in range(i + 1, n):
+            class1 = asset_classes.get(tickers[i], '')
+            class2 = asset_classes.get(tickers[j], '')
+            same_class = class1 == class2
+            
             r1 = returns_data[tickers[i]]
             r2 = returns_data[tickers[j]]
             
-            # Pearson (linear)
+            # Basic correlations
             pearson = np.corrcoef(r1, r2)[0, 1]
             pearson = float(pearson) if not np.isnan(pearson) else 0.0
             pearson_matrix[i, j] = pearson
             pearson_matrix[j, i] = pearson
             
-            # Spearman (rank)
             spearman = calculate_spearman_correlation(r1, r2)
             spearman_matrix[i, j] = spearman
             spearman_matrix[j, i] = spearman
             
-            # Check if correlation is "surprising" (different asset classes with high correlation)
-            same_class = asset_classes[tickers[i]] == asset_classes[tickers[j]]
-            
-            correlations.append({
+            pair_data = {
                 'asset1': tickers[i],
                 'asset2': tickers[j],
-                'class1': asset_classes[tickers[i]],
-                'class2': asset_classes[tickers[j]],
+                'class1': class1,
+                'class2': class2,
                 'pearson': pearson,
                 'spearman': spearman,
                 'same_class': same_class,
-                # Surprising = high correlation between different asset classes
-                'surprising_score': abs(pearson) * (0 if same_class else 1.5)
-            })
+            }
+            
+            all_pairs.append(pair_data)
+            
+            # ONLY do advanced analysis for CROSS-CLASS pairs
+            if not same_class:
+                pairs_computed += 1
+                
+                # Lead-lag analysis
+                lead_lag = calculate_lead_lag_correlation(r1, r2)
+                pair_data.update(lead_lag)
+                
+                # Tail dependence (crash correlation)
+                tail = calculate_tail_dependence(r1, r2)
+                pair_data.update(tail)
+                
+                # Rolling correlation stability
+                stability = calculate_rolling_correlation_stability(r1, r2)
+                pair_data.update(stability)
+                
+                # Categorize the relationship
+                pair_data['relationship_type'] = categorize_relationship(pair_data)
+                
+                # Surprise score: higher for unexpected relationships
+                surprise = abs(pearson) * 1.0
+                if abs(lead_lag['lag_corr']) > abs(pearson) + 0.1:
+                    surprise += 0.3  # Bonus for lead-lag relationships
+                if tail['left_tail'] > 0.3:
+                    surprise += 0.2  # Bonus for crash correlation
+                if stability['stability'] < 0.5:
+                    surprise += 0.1  # Bonus for regime-dependent
+                
+                pair_data['surprise_score'] = surprise
+                cross_class_pairs.append(pair_data)
     
-    # Sort by different criteria
-    by_pearson = sorted(correlations, key=lambda x: x['pearson'], reverse=True)
-    by_pearson_neg = sorted(correlations, key=lambda x: x['pearson'])
-    by_surprising = sorted(correlations, key=lambda x: x['surprising_score'], reverse=True)
+    print(f"[MACRO CORR] Computed {pairs_computed} cross-class pairs with advanced analysis")
     
-    # Find surprising correlations (cross-asset class with high correlation)
-    surprising = [c for c in by_surprising if c['surprising_score'] > 0.4][:top_n]
+    # Sort and categorize
+    by_surprise = sorted(cross_class_pairs, key=lambda x: x.get('surprise_score', 0), reverse=True)
+    by_positive = sorted(cross_class_pairs, key=lambda x: x['pearson'], reverse=True)
+    by_negative = sorted(cross_class_pairs, key=lambda x: x['pearson'])
     
-    print(f"[MACRO CORR] Found {len(surprising)} surprising cross-class correlations")
+    # Find special relationships
+    leading_indicators = [p for p in cross_class_pairs if p.get('relationship_type') == 'LEADING_INDICATOR'][:top_n]
+    crash_correlated = [p for p in cross_class_pairs if p.get('relationship_type') == 'CRASH_CORRELATED'][:top_n]
+    regime_dependent = [p for p in cross_class_pairs if p.get('relationship_type') == 'REGIME_DEPENDENT'][:top_n]
     
     return {
         'pearson_matrix': pearson_matrix.tolist(),
         'spearman_matrix': spearman_matrix.tolist(),
         'tickers': tickers,
         'asset_classes': asset_classes,
-        'top_positive': by_pearson[:top_n],
-        'top_negative': by_pearson_neg[:top_n],
-        'surprising': surprising,
-        'all_pairs': correlations  # For heatmap
+        # Cross-class correlations (most interesting)
+        'top_positive': by_positive[:top_n],
+        'top_negative': by_negative[:top_n],
+        'surprising': by_surprise[:top_n],
+        # Advanced analysis categories
+        'leading_indicators': leading_indicators,
+        'crash_correlations': crash_correlated,
+        'regime_dependent': regime_dependent,
+        # All data
+        'all_pairs': all_pairs,
+        'cross_class_only': cross_class_pairs,
+        # Stats
+        'total_pairs': len(all_pairs),
+        'cross_class_pairs_count': len(cross_class_pairs),
     }
 
 
@@ -595,7 +1071,7 @@ def create_chart_data(analyzed_assets: List[Dict], max_points: int = 500) -> Lis
     return chart_data
 
 
-def create_heatmap_data(correlations: Dict[str, Any]) -> Dict[str, Any]:
+def create_heatmap_data(correlations: Dict[str, Any], analyzed_assets: List[Dict] = None) -> Dict[str, Any]:
     """Create heatmap data structure for frontend visualization"""
     if not correlations.get('tickers'):
         return {}
@@ -603,6 +1079,16 @@ def create_heatmap_data(correlations: Dict[str, Any]) -> Dict[str, Any]:
     tickers = correlations['tickers']
     asset_classes = correlations.get('asset_classes', {})
     pearson_matrix = correlations.get('pearson_matrix', [])
+    spearman_matrix = correlations.get('spearman_matrix', [])
+    
+    # Build name lookup from analyzed_assets
+    asset_names = {}
+    if analyzed_assets:
+        for asset in analyzed_assets:
+            ticker = asset.get('ticker', '')
+            name = asset.get('name', '')
+            if ticker:
+                asset_names[ticker] = name
     
     # Group tickers by asset class for organized heatmap
     class_groups = {}
@@ -633,14 +1119,21 @@ def create_heatmap_data(correlations: Dict[str, Any]) -> Dict[str, Any]:
                 idx1, idx2 = ticker_to_idx[t1], ticker_to_idx[t2]
                 if pearson_matrix and idx1 < len(pearson_matrix) and idx2 < len(pearson_matrix[idx1]):
                     val = pearson_matrix[idx1][idx2]
+                    spearman_val = None
+                    if spearman_matrix and idx1 < len(spearman_matrix) and idx2 < len(spearman_matrix[idx1]):
+                        spearman_val = spearman_matrix[idx1][idx2]
+                    
                     cells.append({
                         'x': j,
                         'y': i,
                         'ticker1': t1,
                         'ticker2': t2,
+                        'name1': asset_names.get(t1, ''),
+                        'name2': asset_names.get(t2, ''),
                         'class1': asset_classes.get(t1, ''),
                         'class2': asset_classes.get(t2, ''),
-                        'value': round(val, 3) if val else 0
+                        'value': round(val, 4) if val else 0,
+                        'spearman': round(spearman_val, 4) if spearman_val else None
                     })
     
     return {
@@ -813,7 +1306,7 @@ def run_macro_analysis(
     correlations = calculate_correlations(analyzed_assets)
     
     # Create heatmap data
-    heatmap_data = create_heatmap_data(correlations)
+    heatmap_data = create_heatmap_data(correlations, analyzed_assets)
     
     # Detect market regimes
     regimes = detect_market_regimes(analyzed_assets)
@@ -850,16 +1343,30 @@ def run_macro_analysis(
         },
         'class_summary': class_summary,
         'assets': clean_assets,
-        # Correlation data
+        
+        # Basic Correlation data
         'correlation_matrix': correlations.get('pearson_matrix'),
         'spearman_matrix': correlations.get('spearman_matrix'),
         'tickers': correlations.get('tickers', []),
         'asset_class_map': correlations.get('asset_classes', {}),
+        
+        # Cross-class analysis (the interesting stuff)
         'top_correlations': correlations.get('top_positive', []),
         'bottom_correlations': correlations.get('top_negative', []),
         'surprising_correlations': correlations.get('surprising', []),
+        
+        # Advanced relationship categories
+        'leading_indicators': correlations.get('leading_indicators', []),
+        'crash_correlations': correlations.get('crash_correlations', []),
+        'regime_dependent': correlations.get('regime_dependent', []),
+        
+        # Stats
+        'total_pairs': correlations.get('total_pairs', 0),
+        'cross_class_pairs_count': correlations.get('cross_class_pairs_count', 0),
+        
         # Heatmap for visualization
         'heatmap': heatmap_data,
+        
         # Regimes and chart
         'regime_analysis': regimes,
         'chart_data': chart_data,

@@ -392,13 +392,39 @@ class StockFetcher:
     
     @staticmethod
     def fetch_financials(ticker: str) -> Dict[str, Any]:
-        """Fetch full financial statements using yfinance"""
+        """Fetch full financial statements using yfinance - returns frontend-friendly format"""
         resolved = StockFetcher.resolve(ticker)
         cache_key = f"stock_fin:{resolved}"
         
         cached = get_cache(cache_key)
         if cached:
             return cached
+        
+        def safe_float(val):
+            """Safely convert value to float"""
+            if val is None:
+                return None
+            try:
+                if str(val) == 'nan' or str(val) == 'NaN':
+                    return None
+                return float(val)
+            except:
+                return None
+        
+        def dataframe_to_array(df):
+            """Convert yfinance DataFrame to array of period objects"""
+            if df is None or df.empty:
+                return []
+            
+            periods = []
+            for col in df.columns:
+                period_data = {'date': str(col.date()) if hasattr(col, 'date') else str(col)}
+                for idx in df.index:
+                    # Clean up the index name (e.g., "Total Revenue" -> "Total_Revenue")
+                    key = str(idx).replace(' ', '_')
+                    period_data[key] = safe_float(df.loc[idx, col])
+                periods.append(period_data)
+            return periods
         
         try:
             import yfinance as yf
@@ -409,92 +435,46 @@ class StockFetcher:
             result = {
                 "ticker": resolved,
                 "asset_type": "stock",
-                "financials": {},
             }
             
-            # Income Statement (quarterly and annual)
+            # Income Statement (annual and quarterly) - as array format
             try:
                 income_annual = stock.income_stmt
-                if income_annual is not None and not income_annual.empty:
-                    result["financials"]["income_statement_annual"] = {
-                        "periods": [str(c.date()) for c in income_annual.columns],
-                        "data": {}
-                    }
-                    for idx in income_annual.index:
-                        values = income_annual.loc[idx].tolist()
-                        result["financials"]["income_statement_annual"]["data"][str(idx)] = [
-                            float(v) if v is not None and str(v) != 'nan' else None for v in values
-                        ]
+                result["income_annual"] = dataframe_to_array(income_annual)
+                print(f"[STOCK FIN] Income annual: {len(result['income_annual'])} periods")
                 
                 income_quarterly = stock.quarterly_income_stmt
-                if income_quarterly is not None and not income_quarterly.empty:
-                    result["financials"]["income_statement_quarterly"] = {
-                        "periods": [str(c.date()) for c in income_quarterly.columns],
-                        "data": {}
-                    }
-                    for idx in income_quarterly.index:
-                        values = income_quarterly.loc[idx].tolist()
-                        result["financials"]["income_statement_quarterly"]["data"][str(idx)] = [
-                            float(v) if v is not None and str(v) != 'nan' else None for v in values
-                        ]
+                result["income_quarterly"] = dataframe_to_array(income_quarterly)
             except Exception as e:
                 print(f"[STOCK FIN] Income statement error: {e}")
+                result["income_annual"] = []
+                result["income_quarterly"] = []
             
-            # Balance Sheet
+            # Balance Sheet (annual and quarterly)
             try:
                 balance_annual = stock.balance_sheet
-                if balance_annual is not None and not balance_annual.empty:
-                    result["financials"]["balance_sheet_annual"] = {
-                        "periods": [str(c.date()) for c in balance_annual.columns],
-                        "data": {}
-                    }
-                    for idx in balance_annual.index:
-                        values = balance_annual.loc[idx].tolist()
-                        result["financials"]["balance_sheet_annual"]["data"][str(idx)] = [
-                            float(v) if v is not None and str(v) != 'nan' else None for v in values
-                        ]
+                result["balance_annual"] = dataframe_to_array(balance_annual)
+                print(f"[STOCK FIN] Balance annual: {len(result['balance_annual'])} periods")
                 
                 balance_quarterly = stock.quarterly_balance_sheet
-                if balance_quarterly is not None and not balance_quarterly.empty:
-                    result["financials"]["balance_sheet_quarterly"] = {
-                        "periods": [str(c.date()) for c in balance_quarterly.columns],
-                        "data": {}
-                    }
-                    for idx in balance_quarterly.index:
-                        values = balance_quarterly.loc[idx].tolist()
-                        result["financials"]["balance_sheet_quarterly"]["data"][str(idx)] = [
-                            float(v) if v is not None and str(v) != 'nan' else None for v in values
-                        ]
+                result["balance_quarterly"] = dataframe_to_array(balance_quarterly)
             except Exception as e:
                 print(f"[STOCK FIN] Balance sheet error: {e}")
+                result["balance_annual"] = []
+                result["balance_quarterly"] = []
             
-            # Cash Flow Statement
+            # Cash Flow Statement (annual and quarterly)
             try:
                 cf_annual = stock.cashflow
-                if cf_annual is not None and not cf_annual.empty:
-                    result["financials"]["cash_flow_annual"] = {
-                        "periods": [str(c.date()) for c in cf_annual.columns],
-                        "data": {}
-                    }
-                    for idx in cf_annual.index:
-                        values = cf_annual.loc[idx].tolist()
-                        result["financials"]["cash_flow_annual"]["data"][str(idx)] = [
-                            float(v) if v is not None and str(v) != 'nan' else None for v in values
-                        ]
+                result["cashflow_annual"] = dataframe_to_array(cf_annual)
+                print(f"[STOCK FIN] Cashflow annual: {len(result['cashflow_annual'])} periods")
                 
                 cf_quarterly = stock.quarterly_cashflow
-                if cf_quarterly is not None and not cf_quarterly.empty:
-                    result["financials"]["cash_flow_quarterly"] = {
-                        "periods": [str(c.date()) for c in cf_quarterly.columns],
-                        "data": {}
-                    }
-                    for idx in cf_quarterly.index:
-                        values = cf_quarterly.loc[idx].tolist()
-                        result["financials"]["cash_flow_quarterly"]["data"][str(idx)] = [
-                            float(v) if v is not None and str(v) != 'nan' else None for v in values
-                        ]
+                result["cashflow_quarterly"] = dataframe_to_array(cf_quarterly)
             except Exception as e:
                 print(f"[STOCK FIN] Cash flow error: {e}")
+                result["cashflow_annual"] = []
+                result["cashflow_quarterly"] = []
             
             # Key statistics and ratios
             try:
